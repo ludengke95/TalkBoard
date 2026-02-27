@@ -1,10 +1,20 @@
+/**
+ * 白板应用主组件
+ * 基于 Excalidraw 的带提词器和屏幕录制功能的白板应用
+ */
 import { useRef, useState, useCallback, useEffect } from 'react'
 import { Excalidraw } from '@excalidraw/excalidraw'
+import { SettingsProvider, useSettings } from './contexts/SettingsContext'
+import SettingsModal from './components/Settings/SettingsModal'
 import './App.css'
 
-function App() {
+// 内部组件 - 在 SettingsProvider 上下文中使用 useSettings
+function AppWithSettings() {
+  const { settings } = useSettings()
+  const { mouseEffect, aspectRatio } = settings
+  
   const excalidrawRef = useRef(null)
-  const [recordingStep, setRecordingStep] = useState('idle') // idle → selecting → recording
+  const [recordingStep, setRecordingStep] = useState('idle')
   const [selectionBox, setSelectionBox] = useState(null)
   const [isDragging, setIsDragging] = useState(false)
   const [dragType, setDragType] = useState(null)
@@ -13,7 +23,6 @@ function App() {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
   const mousePosRef = useRef({ x: 0, y: 0 })
   
-  // 设置和提词器状态
   const [showSettings, setShowSettings] = useState(false)
   const [showTeleprompter, setShowTeleprompter] = useState(false)
   const [teleprompterContent, setTeleprompterContent] = useState('')
@@ -32,14 +41,40 @@ function App() {
   const animationFrameRef = useRef(null)
   const isCapturingRef = useRef(false)
   
-  // 默认选中页面中间区域
   const initSelectionBox = useCallback(() => {
-    const defaultWidth = Math.min(window.innerWidth * 0.6, 800)
-    const defaultHeight = Math.min(window.innerHeight * 0.6, 600)
-    const x = (window.innerWidth - defaultWidth) / 2
-    const y = (window.innerHeight - defaultHeight) / 2
-    setSelectionBox({ x, y, width: defaultWidth, height: defaultHeight })
-  }, [])
+    // 解析画面比例
+    let ratio = 16 / 9 // 默认比例
+    if (aspectRatio && aspectRatio.includes(':')) {
+      const [w, h] = aspectRatio.split(':').map(Number)
+      if (w && h) {
+        ratio = w / h
+      }
+    }
+    
+    // 根据比例计算选择框大小
+    const maxWidth = window.innerWidth * 0.7
+    const maxHeight = window.innerHeight * 0.7
+    
+    let width, height
+    if (maxWidth / maxHeight > ratio) {
+      // 高度受限制
+      height = maxHeight
+      width = height * ratio
+    } else {
+      // 宽度受限制
+      width = maxWidth
+      height = width / ratio
+    }
+    
+    // 确保最小尺寸
+    width = Math.max(width, 200)
+    height = Math.max(height, 150)
+    
+    const x = (window.innerWidth - width) / 2
+    const y = (window.innerHeight - height) / 2
+    
+    setSelectionBox({ x, y, width, height })
+  }, [aspectRatio])
 
   const handleStartSelect = useCallback(() => {
     initSelectionBox()
@@ -51,23 +86,14 @@ function App() {
     setRecordingStep('idle')
   }, [])
 
-  const handleConfirmSelect = useCallback(() => {
-    setRecordingStep('ready')
-  }, [])
-
-  // 鼠标事件处理 - 选择框拖拽
   const handleMouseDown = useCallback((e) => {
     if (recordingStep !== 'selecting' || !selectionBox) return
     
-    const rect = e.target.getBoundingClientRect()
     const mouseX = e.clientX
     const mouseY = e.clientY
-    
-    // 检查点击的是哪个部分
     const handleSize = 10
     const box = selectionBox
     
-    // 角落调整
     if (Math.abs(mouseX - box.x) < handleSize && Math.abs(mouseY - box.y) < handleSize) {
       setDragType('nw')
       setIsDragging(true)
@@ -96,8 +122,6 @@ function App() {
       setInitialBox(box)
       return
     }
-    
-    // 边框调整
     if (Math.abs(mouseX - box.x) < handleSize) {
       setDragType('w')
       setIsDragging(true)
@@ -126,8 +150,6 @@ function App() {
       setInitialBox(box)
       return
     }
-    
-    // 拖拽整个框
     if (mouseX > box.x && mouseX < box.x + box.width && mouseY > box.y && mouseY < box.y + box.height) {
       setDragType('move')
       setIsDragging(true)
@@ -192,24 +214,20 @@ function App() {
     setDragType(null)
   }, [])
 
-  // 录制相关
   const startRecording = useCallback(async () => {
     if (!selectionBox) return
 
-    // 创建录制用的 canvas
     const recordCanvas = document.createElement('canvas')
     recordCanvas.width = selectionBox.width
     recordCanvas.height = selectionBox.height
     recordCanvasRef.current = recordCanvas
     const ctx = recordCanvas.getContext('2d')
 
-    // 获取 Excalidraw 的 canvas
     const getExcalidrawCanvas = () => {
       const canvas = document.querySelector('.excalidraw canvas')
       return canvas
     }
 
-    // 捕获帧
     const captureFrame = () => {
       const sourceCanvas = getExcalidrawCanvas()
       if (sourceCanvas && isCapturingRef.current) {
@@ -219,17 +237,15 @@ function App() {
           0, 0, selectionBox.width, selectionBox.height
         )
         
-        // 计算鼠标在选区中的相对位置
         const relX = mousePosRef.current.x - selectionBox.x
         const relY = mousePosRef.current.y - selectionBox.y
         
-        // 检查鼠标是否在选区内
         if (relX >= 0 && relX <= selectionBox.width && 
             relY >= 0 && relY <= selectionBox.height) {
-          // 绘制黄色圆
           ctx.beginPath()
           ctx.arc(relX, relY, 12, 0, Math.PI * 2)
-          ctx.fillStyle = 'rgba(255, 235, 59, 0.9)'
+          const highlightColor = mouseEffect.enabled ? mouseEffect.color : '#ffeb3b'
+          ctx.fillStyle = highlightColor + 'e6'
           ctx.fill()
         }
         
@@ -237,11 +253,9 @@ function App() {
       }
     }
 
-    // 开始捕获
     isCapturingRef.current = true
     captureFrame()
 
-    // 创建 MediaRecorder
     const stream = recordCanvas.captureStream(30)
     const mediaRecorder = new MediaRecorder(stream, {
       mimeType: 'video/webm;codecs=vp9'
@@ -274,7 +288,7 @@ function App() {
     mediaRecorder.start()
     mediaRecorderRef.current = mediaRecorder
     setRecordingStep('recording')
-  }, [selectionBox])
+  }, [selectionBox, mouseEffect])
 
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
@@ -286,7 +300,6 @@ function App() {
     }
   }, [])
 
-  // 清理
   useEffect(() => {
     return () => {
       isCapturingRef.current = false
@@ -300,14 +313,12 @@ function App() {
     if (recordingStep === 'idle') {
       handleStartSelect()
     } else if (recordingStep === 'selecting') {
-      // 再次点击开始录制
       startRecording()
     } else if (recordingStep === 'ready' || recordingStep === 'recording') {
       stopRecording()
     }
   }, [recordingStep, handleStartSelect, startRecording, stopRecording])
 
-  // 窗口大小变化时更新选区
   useEffect(() => {
     const handleResize = () => {
       if (selectionBox && recordingStep === 'selecting') {
@@ -322,7 +333,6 @@ function App() {
     return () => window.removeEventListener('resize', handleResize)
   }, [selectionBox, recordingStep])
 
-  // 鼠标移动时更新位置
   useEffect(() => {
     if (recordingStep !== 'recording') return
     const handleMouseMove = (e) => {
@@ -333,14 +343,12 @@ function App() {
     return () => window.removeEventListener('mousemove', handleMouseMove)
   }, [recordingStep])
 
-  // 提词器内容变化时自动显示
   useEffect(() => {
     if (teleprompterContent.trim() && !showTeleprompter) {
       setShowTeleprompter(true)
     }
   }, [teleprompterContent])
 
-  // 提词器播放/暂停逻辑
   useEffect(() => {
     if (isPlaying) {
       const interval = Math.max(10, 110 - teleprompterSpeed)
@@ -359,7 +367,6 @@ function App() {
     }
   }, [isPlaying, teleprompterSpeed])
 
-  // 提词器拖拽处理
   const handleTeleprompterDragStart = (e) => {
     setIsDraggingTeleprompter(true)
     setDragOffset({ x: e.clientX - teleprompterPos.x, y: e.clientY - teleprompterPos.y })
@@ -375,20 +382,15 @@ function App() {
     setIsDraggingTeleprompter(false)
   }
 
-  // 组合事件处理函数 - 解决事件冲突
   const handleCombinedMouseMove = useCallback((e) => {
-    // 处理选择框拖拽
     handleMouseMove(e)
-    // 处理提词器拖拽
     handleTeleprompterDrag(e)
   }, [handleMouseMove, handleTeleprompterDrag])
 
   const handleCombinedMouseUp = useCallback(() => {
-    // 处理选择框拖拽结束
     handleMouseUp()
-    // 处理提词器拖拽结束
     handleTeleprompterDragEnd()
-  }, [handleMouseUp, handleTeleprompterDragEnd])
+  }, [handleMouseUp])
 
   return (
     <div className="app" onMouseMove={handleCombinedMouseMove} onMouseUp={handleCombinedMouseUp} onMouseLeave={handleCombinedMouseUp}>
@@ -421,22 +423,10 @@ function App() {
         </button>
       </div>
 
-      {/* 设置弹窗 */}
       {showSettings && (
-        <div className="modal-overlay" onClick={() => setShowSettings(false)}>
-          <div className="settings-modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h3>设置</h3>
-              <button className="modal-close" onClick={() => setShowSettings(false)}>×</button>
-            </div>
-            <div className="modal-body">
-              {/* 空白内容 */}
-            </div>
-          </div>
-        </div>
+        <SettingsModal onClose={() => setShowSettings(false)} />
       )}
 
-      {/* 提词器 */}
       {showTeleprompter && (
         <div 
           className="teleprompter-container"
@@ -485,15 +475,17 @@ function App() {
         </div>
       )}
 
-      {/* 鼠标指示器 */}
       {recordingStep === 'recording' && (
         <div 
           className="cursor-indicator"
-          style={{ left: mousePos.x, top: mousePos.y }}
+          style={{ 
+            left: mousePos.x, 
+            top: mousePos.y,
+            backgroundColor: mouseEffect.enabled ? mouseEffect.color : '#ffeb3b'
+          }}
         />
       )}
       
-      {/* 选择区域遮罩 */}
       {selectionBox && (recordingStep === 'selecting' || recordingStep === 'ready' || recordingStep === 'recording') && (
         <div className={`selection-overlay ${recordingStep === 'recording' ? 'recording' : ''}`}>
           <div 
@@ -506,12 +498,10 @@ function App() {
             }}
             onMouseDown={handleMouseDown}
           >
-            {/* 录制标识 */}
             {(recordingStep === 'ready' || recordingStep === 'recording') && (
               <div className="rec-indicator">REC</div>
             )}
             
-            {/* 调整手柄 - 录制中隐藏 */}
             {recordingStep !== 'recording' && (
               <>
                 <div className="selection-handle nw" />
@@ -525,7 +515,6 @@ function App() {
               </>
             )}
             
-            {/* 尺寸提示 - 录制中隐藏 */}
             {recordingStep !== 'recording' && (
               <div className="selection-size">
                 {Math.round(selectionBox.width)} × {Math.round(selectionBox.height)}
@@ -533,7 +522,6 @@ function App() {
             )}
           </div>
           
-          {/* 操作按钮 */}
           {recordingStep === 'selecting' && (
             <div className="selection-actions">
               <button className="btn-cancel" onClick={handleCancelSelect}>
@@ -548,6 +536,15 @@ function App() {
         <Excalidraw ref={excalidrawRef} langCode="zh-CN" />
       </main>
     </div>
+  )
+}
+
+// 主应用组件 - 包裹 SettingsProvider
+function App() {
+  return (
+    <SettingsProvider>
+      <AppWithSettings />
+    </SettingsProvider>
   )
 }
 

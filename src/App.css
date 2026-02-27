@@ -439,3 +439,676 @@ body {
 .teleprompter-content::placeholder {
   color: rgba(255, 255, 255, 0.4);
 }
+
+
+/* 设置弹窗样式扩展 */
+.settings-modal-large {
+  min-width: 700px;
+  max-width: 900px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 12px 20px;
+  border-bottom: 1px solid #eee;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+.settings-tab {
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #666;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.settings-tab:hover {
+  background: #f5f5f5;
+}
+
+.settings-tab.active {
+  background: #1976d2;
+  color: #fff;
+}
+
+.settings-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-top: 1px solid #eee;
+  flex-shrink: 0;
+}
+
+.btn-reset {
+  padding: 10px 20px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #666;
+}
+
+.btn-reset:hover {
+  background: #f5f5f5;
+}
+
+.btn-done {
+  padding: 10px 24px;
+  background: #1976d2;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #fff;
+}
+
+.btn-done:hover {
+  background: #1565c0;
+}
+
+/* 设置区块 */
+.setting-section {
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.setting-section:last-child {
+  border-bottom: none;
+}
+
+.setting-title {
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.setting-desc {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: #888;
+}
+
+.setting-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.setting-label {
+  min-width: 80px;
+  font-size: 13px;
+  color: #555;
+}
+
+/* 开关样式 */
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.toggle-input {
+  display: none;
+}
+
+.toggle-switch {
+  width: 44px;
+  height: 24px;
+  background: #ccc;
+  border-radius: 12px;
+  position: relative;
+  transition: background 0.3s;
+}
+
+.toggle-switch::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: #fff;
+  border-radius: 50%;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.3s;
+}
+
+.toggle-input:checked + .toggle-switch {
+  background: #4caf50;
+}
+
+.toggle-input:checked + .toggle-switch::after {
+  transform: translateX(20px);
+}
+
+/* 画面比例选择 */
+.aspect-ratio-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.aspect-ratio-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 8px;
+  border: 2px solid #eee;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.aspect-ratio-option:hover {
+  border-color: #bbb;
+}
+
+.aspect-ratio-option.selected {
+  border-color: #1976d2;
+  background: #f0f7ff;
+}
+
+.aspect-ratio-option input {
+  display: none;
+}
+
+.ratio-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+.ratio-desc {
+  font-size: 11px;
+  color: #888;
+  margin-top: 4px;
+}
+
+.custom-ratio-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.custom-ratio-input input {
+  width: 80px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.custom-ratio-input span {
+  font-size: 16px;
+  color: #666;
+}
+
+/* 背景选择 */
+.background-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.background-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px;
+  border: 2px solid #eee;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.background-option:hover {
+  border-color: #bbb;
+}
+
+.background-option.selected {
+  border-color: #1976d2;
+  background: #f0f7ff;
+}
+
+.color-thumb {
+  width: 60px;
+  height: 40px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.image-thumb {
+  width: 60px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.background-name {
+  font-size: 11px;
+  color: #666;
+  margin-top: 6px;
+  text-align: center;
+}
+
+.custom-background {
+  margin-top: 12px;
+}
+
+.custom-background h5 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  color: #666;
+}
+
+.color-picker-row,
+.url-input-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.color-input {
+  width: 40px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.color-text {
+  width: 100px;
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.url-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.url-submit-btn {
+  padding: 8px 16px;
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.url-submit-btn:hover {
+  background: #1565c0;
+}
+
+/* 圆角半径 */
+.corner-radius-preview {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.preview-box {
+  width: 120px;
+  height: 80px;
+  background: #fff;
+  border: 2px solid #1976d2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #666;
+}
+
+.corner-radius-presets {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.preset-btn {
+  padding: 6px 12px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #555;
+}
+
+.preset-btn:hover {
+  border-color: #1976d2;
+}
+
+.preset-btn.active {
+  background: #1976d2;
+  border-color: #1976d2;
+  color: #fff;
+}
+
+.corner-radius-slider,
+.size-slider,
+.margin-slider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.slider-input {
+  flex: 1;
+  height: 4px;
+  -webkit-appearance: none;
+  background: #ddd;
+  border-radius: 2px;
+  outline: none;
+}
+
+.slider-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  background: #1976d2;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.slider-value {
+  min-width: 50px;
+  font-size: 13px;
+  color: #666;
+  text-align: right;
+}
+
+/* 摄像头设置 */
+.camera-preview {
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.preview-video {
+  object-fit: cover;
+  border: 2px solid #1976d2;
+}
+
+.preview-video.circle {
+  border-radius: 50%;
+}
+
+.preview-placeholder {
+  width: 120px;
+  height: 90px;
+  background: #ddd;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #666;
+}
+
+.setting-select {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+  background: #fff;
+}
+
+.shape-options,
+.position-options {
+  display: flex;
+  gap: 8px;
+}
+
+.shape-btn,
+.position-btn {
+  padding: 6px 14px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  color: #555;
+}
+
+.shape-btn:hover,
+.position-btn:hover {
+  border-color: #1976d2;
+}
+
+.shape-btn.active,
+.position-btn.active {
+  background: #1976d2;
+  border-color: #1976d2;
+  color: #fff;
+}
+
+/* 麦克风设置 */
+.audio-level {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.audio-label {
+  font-size: 13px;
+  color: #666;
+  min-width: 40px;
+}
+
+.audio-meter {
+  flex: 1;
+  height: 8px;
+  background: #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.audio-meter-fill {
+  height: 100%;
+  transition: width 0.3s;
+}
+
+.audio-status {
+  font-size: 12px;
+  color: #888;
+  min-width: 50px;
+}
+
+.loading-tip {
+  font-size: 12px;
+  color: #888;
+  font-style: italic;
+}
+
+/* 鼠标效果 */
+.mouse-effect-preview {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.preview-label {
+  font-size: 13px;
+  color: #666;
+}
+
+.preview-cursor {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+.cursor-icon {
+  font-size: 16px;
+}
+
+.color-presets {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.color-preset-btn {
+  width: 32px;
+  height: 32px;
+  border: 2px solid #eee;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.color-preset-btn:hover {
+  transform: scale(1.1);
+}
+
+.color-preset-btn.active {
+  border-color: #333;
+}
+
+.check-mark {
+  color: #fff;
+  font-size: 14px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+
+.custom-color-picker {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.color-picker-input {
+  width: 40px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.color-text-input {
+  width: 100px;
+  padding: 6px 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.current-color {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #666;
+  margin-top: 12px;
+}
+
+.color-swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+/* 边距设置 */
+.margin-preview {
+  position: relative;
+  height: 160px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.preview-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bg-label {
+  color: rgba(255,255,255,0.5);
+  font-size: 14px;
+}
+
+.preview-recording {
+  position: absolute;
+  background: rgba(255,255,255,0.9);
+  border: 2px dashed #1976d2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.recording-label {
+  font-size: 12px;
+  color: #1976d2;
+}
+
+.margin-presets {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.margin-tip {
+  font-size: 12px;
+  color: #888;
+  margin-top: 8px;
+}

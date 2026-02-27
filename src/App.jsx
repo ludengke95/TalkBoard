@@ -6,12 +6,14 @@ import { useRef, useState, useCallback, useEffect } from 'react'
 import { Excalidraw } from '@excalidraw/excalidraw'
 import { SettingsProvider, useSettings } from './contexts/SettingsContext'
 import SettingsModal from './components/Settings/SettingsModal'
+import { useMediaDevices } from './hooks/useMediaDevices'
 import './App.css'
 
 // 内部组件 - 在 SettingsProvider 上下文中使用 useSettings
 function AppWithSettings() {
   const { settings } = useSettings()
   const { mouseEffect, aspectRatio } = settings
+  const { enumerateDevices } = useMediaDevices()
   
   const excalidrawRef = useRef(null)
   const [recordingStep, setRecordingStep] = useState('idle')
@@ -75,6 +77,18 @@ function AppWithSettings() {
     
     setSelectionBox({ x, y, width, height })
   }, [aspectRatio])
+
+  useEffect(() => {
+    const requestPermissions = async () => {
+      try {
+        await navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+        enumerateDevices()
+      } catch (err) {
+        console.warn('请求媒体权限失败:', err)
+      }
+    }
+    requestPermissions()
+  }, [enumerateDevices])
 
   const handleStartSelect = useCallback(() => {
     initSelectionBox()
@@ -494,7 +508,8 @@ function AppWithSettings() {
               left: selectionBox.x,
               top: selectionBox.y,
               width: selectionBox.width,
-              height: selectionBox.height
+              height: selectionBox.height,
+              borderRadius: settings.cornerRadius ? `${settings.cornerRadius}px` : 0
             }}
             onMouseDown={handleMouseDown}
           >

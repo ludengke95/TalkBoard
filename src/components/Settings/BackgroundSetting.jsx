@@ -2,7 +2,6 @@
  * 背景图片设置组件
  * 提供免费图片作为背景选项
  */
-import { useState } from 'react'
 import { useSettings } from '../../contexts/SettingsContext'
 
 // 预设免费背景图片（来自 Pexels/Unsplash）
@@ -21,8 +20,6 @@ const presetBackgrounds = [
 function BackgroundSetting() {
   const { settings, updateSetting } = useSettings()
   const { background } = settings
-  const [customColor, setCustomColor] = useState(background.value || '#f5f5f5')
-  const [customUrl, setCustomUrl] = useState('')
 
   // 处理背景选择
   const handleBackgroundSelect = (bg) => {
@@ -30,25 +27,6 @@ function BackgroundSetting() {
       type: bg.type,
       value: bg.value
     })
-  }
-
-  // 处理自定义颜色
-  const handleColorChange = (color) => {
-    setCustomColor(color)
-    updateSetting('background', {
-      type: 'color',
-      value: color
-    })
-  }
-
-  // 处理自定义图片 URL
-  const handleUrlSubmit = () => {
-    if (customUrl.trim()) {
-      updateSetting('background', {
-        type: 'image',
-        value: customUrl.trim()
-      })
-    }
   }
 
   return (
@@ -82,46 +60,6 @@ function BackgroundSetting() {
             <span className="background-name">{bg.name}</span>
           </div>
         ))}
-      </div>
-
-      {/* 自定义颜色选择 */}
-      <div className="custom-background">
-        <h5>自定义颜色</h5>
-        <div className="color-picker-row">
-          <input
-            type="color"
-            value={customColor}
-            onChange={(e) => handleColorChange(e.target.value)}
-            className="color-input"
-          />
-          <input
-            type="text"
-            value={customColor}
-            onChange={(e) => handleColorChange(e.target.value)}
-            className="color-text"
-            placeholder="#f5f5f5"
-          />
-        </div>
-      </div>
-
-      {/* 自定义图片 URL */}
-      <div className="custom-background">
-        <h5>自定义图片 URL</h5>
-        <div className="url-input-row">
-          <input
-            type="text"
-            value={customUrl}
-            onChange={(e) => setCustomUrl(e.target.value)}
-            placeholder="输入图片地址..."
-            className="url-input"
-          />
-          <button 
-            className="url-submit-btn"
-            onClick={handleUrlSubmit}
-          >
-            应用
-          </button>
-        </div>
       </div>
     </div>
   )

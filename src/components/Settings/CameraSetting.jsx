@@ -2,30 +2,17 @@
  * 摄像头设置组件
  * 设置摄像头的开关、形状、大小和位置
  */
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useSettings } from '../../contexts/SettingsContext'
 import { useMediaDevices } from '../../hooks/useMediaDevices'
 
 function CameraSetting() {
   const { settings, updateSetting } = useSettings()
   const { camera } = settings
-  const { videoDevices, videoStream, startVideo, stopVideo, isLoading } = useMediaDevices()
+  const { videoDevices } = useMediaDevices()
   
   // 本地状态
   const [selectedDevice, setSelectedDevice] = useState(camera.deviceId || '')
-
-  // 监听摄像头开关状态
-  useEffect(() => {
-    if (camera.enabled && selectedDevice) {
-      startVideo(selectedDevice)
-    } else {
-      stopVideo()
-    }
-    
-    return () => {
-      stopVideo()
-    }
-  }, [camera.enabled])
 
   // 处理摄像头开关
   const handleToggle = (enabled) => {
@@ -94,31 +81,6 @@ function CameraSetting() {
 
       {camera.enabled && (
         <>
-          {/* 摄像头预览 */}
-          <div className="camera-preview">
-            {videoStream ? (
-              <video
-                ref={(video) => {
-                  if (video) {
-                    video.srcObject = videoStream
-                  }
-                }}
-                autoPlay
-                muted
-                playsInline
-                className={`preview-video ${camera.shape}`}
-                style={{
-                  width: camera.size,
-                  height: camera.shape === 'circle' ? camera.size : camera.size * 0.75
-                }}
-              />
-            ) : (
-              <div className="preview-placeholder">
-                {isLoading ? '加载中...' : '无视频'}
-              </div>
-            )}
-          </div>
-
           {/* 设备选择 */}
           <div className="setting-row">
             <label className="setting-label">选择摄像头</label>
@@ -130,11 +92,14 @@ function CameraSetting() {
               {videoDevices.length === 0 ? (
                 <option value="">未检测到摄像头</option>
               ) : (
-                videoDevices.map((device, index) => (
-                  <option key={device.deviceId} value={device.deviceId}>
-                    {device.label || `摄像头 ${index + 1}`}
-                  </option>
-                ))
+                <>
+                  <option value="">默认摄像头</option>
+                  {videoDevices.map((device, index) => (
+                    <option key={device.deviceId} value={device.deviceId}>
+                      {device.label || `摄像头 ${index + 1}`}
+                    </option>
+                  ))}
+                </>
               )}
             </select>
           </div>

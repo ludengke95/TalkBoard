@@ -31,7 +31,7 @@ function App() {
   const recordCanvasRef = useRef(null)
   const animationFrameRef = useRef(null)
   const isCapturingRef = useRef(false)
-
+  
   // 默认选中页面中间区域
   const initSelectionBox = useCallback(() => {
     const defaultWidth = Math.min(window.innerWidth * 0.6, 800)
@@ -55,7 +55,7 @@ function App() {
     setRecordingStep('ready')
   }, [])
 
-  // 鼠标事件处理
+  // 鼠标事件处理 - 选择框拖拽
   const handleMouseDown = useCallback((e) => {
     if (recordingStep !== 'selecting' || !selectionBox) return
     
@@ -375,8 +375,23 @@ function App() {
     setIsDraggingTeleprompter(false)
   }
 
+  // 组合事件处理函数 - 解决事件冲突
+  const handleCombinedMouseMove = useCallback((e) => {
+    // 处理选择框拖拽
+    handleMouseMove(e)
+    // 处理提词器拖拽
+    handleTeleprompterDrag(e)
+  }, [handleMouseMove, handleTeleprompterDrag])
+
+  const handleCombinedMouseUp = useCallback(() => {
+    // 处理选择框拖拽结束
+    handleMouseUp()
+    // 处理提词器拖拽结束
+    handleTeleprompterDragEnd()
+  }, [handleMouseUp, handleTeleprompterDragEnd])
+
   return (
-    <div className="app" onMouseMove={handleMouseMove} onMouseUp={handleMouseUp} onMouseMove={handleTeleprompterDrag} onMouseUp={handleTeleprompterDragEnd} onMouseLeave={handleTeleprompterDragEnd}>
+    <div className="app" onMouseMove={handleCombinedMouseMove} onMouseUp={handleCombinedMouseUp} onMouseLeave={handleCombinedMouseUp}>
       <div className="floating-toolbar">
         <div className="toolbar-left">
           <button className="toolbar-btn" onClick={() => setShowSettings(!showSettings)} title="设置">

@@ -1,0 +1,73 @@
+.toolbar-floating {
+  position: fixed;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: rgba(30, 30, 30, 0.9);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  cursor: move;
+  user-select: none;
+  transition: box-shadow 0.2s ease;
+}
+
+.toolbar-floating:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.toolbar-floating.dragging {
+  cursor: grabbing;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.toolbar-left {
+  display: flex;
+  gap: 8px;
+}
+
+.toolbar-btn {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.toolbar-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.record-btn {
+  padding: 8px 16px;
+  border: none;
+  background: #f44336;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.record-btn:hover {
+  background: #e53935;
+  transform: scale(1.02);
+}
+
+.record-btn.recording {
+  background: #ff1744;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}

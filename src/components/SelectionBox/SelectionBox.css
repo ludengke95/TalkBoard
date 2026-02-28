@@ -1,0 +1,114 @@
+.selection-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+  pointer-events: auto;
+}
+
+.selection-overlay.selecting {
+  pointer-events: auto;
+}
+
+.selection-overlay.locked {
+  pointer-events: none;
+}
+
+.selection-box {
+  position: absolute;
+  border: 2px dashed rgba(255, 255, 255, 0.6);
+  background: transparent;
+  cursor: move;
+  pointer-events: auto;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+}
+
+.selection-box.selecting {
+  border-color: rgba(255, 255, 255, 0.8);
+}
+
+.selection-box.recording {
+  border-style: solid;
+  border-color: #f44336;
+}
+
+.selection-box.locked {
+  pointer-events: none;
+  cursor: default;
+}
+
+.rec-indicator {
+  position: absolute;
+  top: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #f44336;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.selection-handle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: white;
+  border: 2px solid #333;
+  border-radius: 2px;
+}
+
+.selection-handle.nw { top: -5px; left: -5px; cursor: nw-resize; }
+.selection-handle.n { top: -5px; left: 50%; transform: translateX(-50%); cursor: n-resize; }
+.selection-handle.ne { top: -5px; right: -5px; cursor: ne-resize; }
+.selection-handle.w { top: 50%; left: -5px; transform: translateY(-50%); cursor: w-resize; }
+.selection-handle.e { top: 50%; right: -5px; transform: translateY(-50%); cursor: e-resize; }
+.selection-handle.sw { bottom: -5px; left: -5px; cursor: sw-resize; }
+.selection-handle.s { bottom: -5px; left: 50%; transform: translateX(-50%); cursor: s-resize; }
+.selection-handle.se { bottom: -5px; right: -5px; cursor: se-resize; }
+
+.selection-size {
+  position: absolute;
+  bottom: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.selection-actions {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.btn-cancel {
+  padding: 8px 24px;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+
+.btn-cancel:hover {
+  background: rgba(255, 255, 255, 1);
+}

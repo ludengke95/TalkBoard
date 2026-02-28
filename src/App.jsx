@@ -4,6 +4,15 @@
  */
 import { useRef, useState, useCallback, useEffect } from "react";
 import { Excalidraw } from "@excalidraw/excalidraw";
+import {
+  Input,
+  Output,
+  Mp4OutputFormat,
+  BufferTarget,
+  Conversion,
+  BlobSource,
+  WEBM,
+} from "mediabunny";
 import { SettingsProvider, useSettings } from "./contexts/SettingsContext";
 import SettingsModal from "./components/Settings/SettingsModal";
 import Toolbar from "./components/Toolbar/Toolbar";
@@ -306,7 +315,7 @@ function AppWithSettings() {
       }
     };
 
-    mediaRecorder.onstop = () => {
+    mediaRecorder.onstop = async () => {
       isCapturingRef.current = false;
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
@@ -320,13 +329,36 @@ function AppWithSettings() {
       videoRef.current = null;
 
       if (chunksRef.current.length > 0) {
-        const blob = new Blob(chunksRef.current, { type: "video/webm" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `whiteboard-${Date.now()}.webm`;
-        a.click();
-        URL.revokeObjectURL(url);
+        const webmBlob = new Blob(chunksRef.current, { type: "video/webm" });
+
+        try {
+          const input = new Input({ source: new BlobSource(webmBlob), formats: [WEBM] });
+          const output = new Output({
+            format: new Mp4OutputFormat(),
+            target: new BufferTarget(),
+          });
+
+          const conversion = await Conversion.init({ input, output });
+          await conversion.execute();
+
+          const mp4Buffer = output.target.buffer;
+          const mp4Blob = new Blob([mp4Buffer], { type: "video/mp4" });
+
+          const url = URL.createObjectURL(mp4Blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `whiteboard-${Date.now()}.mp4`;
+          a.click();
+          URL.revokeObjectURL(url);
+        } catch (error) {
+          console.error("视频转换失败:", error);
+          const url = URL.createObjectURL(webmBlob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = `whiteboard-${Date.now()}.webm`;
+          a.click();
+          URL.revokeObjectURL(url);
+        }
       }
       setRecordingStep("idle");
     };

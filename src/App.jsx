@@ -92,14 +92,47 @@ function AppWithSettings() {
   const startRecording = useCallback(async () => {
     if (!selectionBox || !excalidrawRef.current) return
 
+    const margin = settings.margin || 0
+    const bgType = settings.background.type
+    const bgValue = settings.background.value
+
+    // 计算包含边距的总尺寸
+    const totalWidth = selectionBox.width + margin * 2
+    const totalHeight = selectionBox.height + margin * 2
+
     const recordCanvas = document.createElement('canvas')
-    recordCanvas.width = selectionBox.width
-    recordCanvas.height = selectionBox.height
+    recordCanvas.width = totalWidth
+    recordCanvas.height = totalHeight
     recordCanvasRef.current = recordCanvas
     const ctx = recordCanvas.getContext('2d')
 
+    // 加载背景图
+    let bgImage = null
+    if (bgType === 'image' && bgValue) {
+      bgImage = new Image()
+      bgImage.crossOrigin = 'anonymous'
+      await new Promise((resolve, reject) => {
+        bgImage.onload = resolve
+        bgImage.onerror = reject
+        bgImage.src = bgValue
+      })
+    }
+
     const captureFrame = () => {
       if (!isCapturingRef.current) return
+
+      // 清空画布
+      ctx.clearRect(0, 0, totalWidth, totalHeight)
+
+      // 绘制背景
+      if (bgImage) {
+        // 绘制图片背景
+        ctx.drawImage(bgImage, 0, 0, totalWidth, totalHeight)
+      } else {
+        // 绘制纯色背景
+        ctx.fillStyle = bgValue || '#f5f5f5'
+        ctx.fillRect(0, 0, totalWidth, totalHeight)
+      }
 
       // 直接获取 Excalidraw 的 canvas
       const excalidrawCanvas = document.querySelector('.excalidraw canvas:last-of-type')
@@ -116,17 +149,19 @@ function AppWithSettings() {
       const srcW = selectionBox.width * scaleX
       const srcH = selectionBox.height * scaleY
 
+      // 在边距位置绘制录制内容
       ctx.drawImage(
         excalidrawCanvas,
         srcX, srcY, srcW, srcH,
-        0, 0, selectionBox.width, selectionBox.height
+        margin, margin, selectionBox.width, selectionBox.height
       )
 
-      const relX = mousePosRef.current.x - selectionBox.x
-      const relY = mousePosRef.current.y - selectionBox.y
+      // 绘制鼠标指示器（相对于总画布）
+      const relX = mousePosRef.current.x - selectionBox.x + margin
+      const relY = mousePosRef.current.y - selectionBox.y + margin
       
-      if (relX >= 0 && relX <= selectionBox.width && 
-          relY >= 0 && relY <= selectionBox.height) {
+      if (relX >= margin && relX <= margin + selectionBox.width && 
+          relY >= margin && relY <= margin + selectionBox.height) {
         ctx.beginPath()
         ctx.arc(relX, relY, 12, 0, Math.PI * 2)
         const highlightColor = mouseEffect.enabled ? mouseEffect.color : '#ffeb3b'
@@ -174,7 +209,7 @@ function AppWithSettings() {
     mediaRecorder.start(1000)
     mediaRecorderRef.current = mediaRecorder
     setRecordingStep('recording')
-  }, [selectionBox, mouseEffect])
+  }, [selectionBox, mouseEffect, settings])
 
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {

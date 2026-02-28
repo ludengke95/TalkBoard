@@ -5,9 +5,28 @@ const STORAGE_KEY = 'byv-teleprompter-position'
 
 function Teleprompter({ content, onContentChange }) {
   const [isVisible, setIsVisible] = useState(false)
-  const [position, setPosition] = useState(() => {
+  const [percentPosition, setPercentPosition] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
-    return saved ? JSON.parse(saved) : { x: 20, y: 20 }
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved)
+        if (parsed.x > 1 || parsed.y > 1) {
+          return { 
+            x: parsed.x / window.innerWidth, 
+            y: parsed.y / window.innerHeight 
+          }
+        }
+        return parsed
+      } catch {
+        return { x: 0.02, y: 0.02 }
+      }
+    }
+    return { x: 0.02, y: 0.02 }
+  })
+  
+  const [position, setPosition] = useState({ 
+    x: percentPosition.x * window.innerWidth, 
+    y: percentPosition.y * window.innerHeight 
   })
   const [speed, setSpeed] = useState(50)
   const [opacity, setOpacity] = useState(80)
@@ -18,9 +37,23 @@ function Teleprompter({ content, onContentChange }) {
   const teleprompterRef = useRef(null)
   const scrollIntervalRef = useRef(null)
 
+  // 监听窗口大小变化
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(position))
-  }, [position])
+    const handleResize = () => {
+      if (!isDragging) {
+        setPosition({
+          x: percentPosition.x * window.innerWidth,
+          y: percentPosition.y * window.innerHeight
+        })
+      }
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [percentPosition, isDragging])
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(percentPosition))
+  }, [percentPosition])
 
   useEffect(() => {
     if (content.trim() && !isVisible) {
@@ -56,10 +89,10 @@ function Teleprompter({ content, onContentChange }) {
 
   const handleDrag = useCallback((e) => {
     if (isDragging) {
-      setPosition({
-        x: Math.max(0, e.clientX - dragOffset.x),
-        y: Math.max(0, e.clientY - dragOffset.y)
-      })
+      const newX = Math.max(0, Math.min(window.innerWidth - 400, e.clientX - dragOffset.x))
+      const newY = Math.max(0, Math.min(window.innerHeight - 300, e.clientY - dragOffset.y))
+      setPosition({ x: newX, y: newY })
+      setPercentPosition({ x: newX / window.innerWidth, y: newY / window.innerHeight })
     }
   }, [isDragging, dragOffset])
 

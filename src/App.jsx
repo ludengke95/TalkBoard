@@ -267,6 +267,7 @@ function AppWithSettings() {
         box={selectionBox ? { ...selectionBox, onChange: handleBoxChange } : null}
         recordingStep={recordingStep}
         cornerRadius={cornerRadius}
+        aspectRatio={aspectRatio}
         onCancel={handleCancelSelect}
       />
       

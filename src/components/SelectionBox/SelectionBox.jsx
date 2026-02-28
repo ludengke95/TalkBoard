@@ -7,7 +7,7 @@ function SelectionBox({
   box, 
   recordingStep, 
   cornerRadius,
-  onMouseDown,
+  aspectRatio,
   onCancel 
 }) {
   const [isDragging, setIsDragging] = useState(false)
@@ -15,12 +15,24 @@ function SelectionBox({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const [initialBox, setInitialBox] = useState({ x: 0, y: 0, width: 0, height: 0 })
 
+  // 计算当前宽高比
+  const getRatio = () => {
+    if (aspectRatio && aspectRatio.includes(':')) {
+      const [w, h] = aspectRatio.split(':').map(Number)
+      if (w && h) return w / h
+    }
+    return 16 / 9
+  }
+
+  const ratio = getRatio()
+
   const handleMouseDown = useCallback((e) => {
     if (!box) return
     
     const mouseX = e.clientX
     const mouseY = e.clientY
     
+    // 只处理四角拖拽
     if (Math.abs(mouseX - box.x) < HANDLE_SIZE && Math.abs(mouseY - box.y) < HANDLE_SIZE) {
       setDragType('nw')
       setIsDragging(true)
@@ -49,45 +61,15 @@ function SelectionBox({
       setInitialBox(box)
       return
     }
-    if (Math.abs(mouseX - box.x) < HANDLE_SIZE) {
-      setDragType('w')
-      setIsDragging(true)
-      setDragStart({ x: mouseX, y: mouseY })
-      setInitialBox(box)
-      return
-    }
-    if (Math.abs(mouseX - (box.x + box.width)) < HANDLE_SIZE) {
-      setDragType('e')
-      setIsDragging(true)
-      setDragStart({ x: mouseX, y: mouseY })
-      setInitialBox(box)
-      return
-    }
-    if (Math.abs(mouseY - box.y) < HANDLE_SIZE) {
-      setDragType('n')
-      setIsDragging(true)
-      setDragStart({ x: mouseX, y: mouseY })
-      setInitialBox(box)
-      return
-    }
-    if (Math.abs(mouseY - (box.y + box.height)) < HANDLE_SIZE) {
-      setDragType('s')
-      setIsDragging(true)
-      setDragStart({ x: mouseX, y: mouseY })
-      setInitialBox(box)
-      return
-    }
+    
+    // 中心拖拽移动整个框
     if (mouseX > box.x && mouseX < box.x + box.width && mouseY > box.y && mouseY < box.y + box.height) {
       setDragType('move')
       setIsDragging(true)
       setDragStart({ x: mouseX, y: mouseY })
       setInitialBox(box)
     }
-    
-    if (onMouseDown) {
-      onMouseDown(e)
-    }
-  }, [box, onMouseDown])
+  }, [box])
 
   const handleMouseMove = useCallback((e) => {
     if (!isDragging || !dragType || !initialBox) return
@@ -105,42 +87,28 @@ function SelectionBox({
         newBox.x = Math.max(0, initialBox.x + dx)
         newBox.y = Math.max(0, initialBox.y + dy)
         newBox.width = Math.max(50, initialBox.width - dx)
-        newBox.height = Math.max(50, initialBox.height - dy)
+        newBox.height = newBox.width / ratio
         break
       case 'ne':
         newBox.y = Math.max(0, initialBox.y + dy)
         newBox.width = Math.max(50, initialBox.width + dx)
-        newBox.height = Math.max(50, initialBox.height - dy)
+        newBox.height = newBox.width / ratio
         break
       case 'sw':
         newBox.x = Math.max(0, initialBox.x + dx)
         newBox.width = Math.max(50, initialBox.width - dx)
-        newBox.height = Math.max(50, initialBox.height + dy)
+        newBox.height = newBox.width / ratio
         break
       case 'se':
         newBox.width = Math.max(50, initialBox.width + dx)
-        newBox.height = Math.max(50, initialBox.height + dy)
-        break
-      case 'w':
-        newBox.x = Math.max(0, initialBox.x + dx)
-        newBox.width = Math.max(50, initialBox.width - dx)
-        break
-      case 'e':
-        newBox.width = Math.max(50, initialBox.width + dx)
-        break
-      case 'n':
-        newBox.y = Math.max(0, initialBox.y + dy)
-        newBox.height = Math.max(50, initialBox.height - dy)
-        break
-      case 's':
-        newBox.height = Math.max(50, initialBox.height + dy)
+        newBox.height = newBox.width / ratio
         break
     }
     
     if (box && box.onChange) {
       box.onChange(newBox)
     }
-  }, [isDragging, dragType, dragStart, initialBox, box])
+  }, [isDragging, dragType, dragStart, initialBox, box, ratio])
 
   const handleMouseUp = useCallback(() => {
     setIsDragging(false)
@@ -184,15 +152,11 @@ function SelectionBox({
           <div className="rec-indicator">REC</div>
         )}
         
-        {!isRecording && (
+        {!isRecording && isSelecting && (
           <>
             <div className="selection-handle nw" />
-            <div className="selection-handle n" />
             <div className="selection-handle ne" />
-            <div className="selection-handle w" />
-            <div className="selection-handle e" />
             <div className="selection-handle sw" />
-            <div className="selection-handle s" />
             <div className="selection-handle se" />
           </>
         )}

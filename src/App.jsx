@@ -11,12 +11,13 @@ import Teleprompter from './components/Teleprompter/Teleprompter'
 import SelectionBox from './components/SelectionBox/SelectionBox'
 import CursorIndicator from './components/CursorIndicator/CursorIndicator'
 import { useMediaDevices } from './hooks/useMediaDevices'
+import CameraPreview from './components/CameraPreview/CameraPreview'
 import './App.css'
 
 function AppWithSettings() {
   const { settings } = useSettings()
-  const { mouseEffect, aspectRatio, cornerRadius } = settings
-  const { enumerateDevices } = useMediaDevices()
+  const { mouseEffect, aspectRatio, cornerRadius, camera } = settings
+  const { enumerateDevices, startVideo, stopVideo } = useMediaDevices()
   
   const excalidrawRef = useRef(null)
   const [recordingStep, setRecordingStep] = useState('idle')
@@ -32,6 +33,71 @@ function AppWithSettings() {
   const recordCanvasRef = useRef(null)
   const animationFrameRef = useRef(null)
   const isCapturingRef = useRef(false)
+  const videoRef = useRef(null)
+  const cameraStreamRef = useRef(null)
+  
+  // 绘制摄像头画面到画布
+  const drawCameraToCanvas = useCallback((ctx, canvasWidth, canvasHeight) => {
+    if (!videoRef.current || videoRef.current.readyState < 2) return
+    
+    const video = videoRef.current
+    const { size, shape, position } = camera
+    
+    // 计算摄像头位置
+    let x, y
+    const offsetX = 20
+    const offsetY = 20
+    
+    switch (position) {
+      case 'top-left':
+        x = offsetX
+        y = offsetY
+        break
+      case 'top-right':
+        x = canvasWidth - size - offsetX
+        y = offsetY
+        break
+      case 'bottom-left':
+        x = offsetX
+        y = canvasHeight - size - offsetY
+        break
+      case 'bottom-right':
+      default:
+        x = canvasWidth - size - offsetX
+        y = canvasHeight - size - offsetY
+        break
+    }
+    
+    // 保存当前上下文
+    ctx.save()
+    
+    // 创建裁剪区域
+    ctx.beginPath()
+    if (shape === 'circle') {
+      ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2)
+    } else {
+      ctx.rect(x, y, size, size)
+    }
+    ctx.clip()
+    
+    // 绘制摄像头画面
+    // 保持视频比例，进行覆盖填充
+    const videoRatio = video.videoWidth / video.videoHeight
+    let drawWidth = size
+    let drawHeight = size / videoRatio
+    
+    if (drawHeight < size) {
+      drawHeight = size
+      drawWidth = size * videoRatio
+    }
+    
+    const drawX = x + (size - drawWidth) / 2
+    const drawY = y + (size - drawHeight) / 2
+    
+    ctx.drawImage(video, drawX, drawY, drawWidth, drawHeight)
+    
+    ctx.restore()
+  }, [camera])
   
   const initSelectionBox = useCallback(() => {
     let ratio = 16 / 9
@@ -75,14 +141,26 @@ function AppWithSettings() {
     requestPermissions()
   }, [enumerateDevices])
 
-  const handleStartSelect = useCallback(() => {
+  const handleStartSelect = useCallback(async () => {
     initSelectionBox()
+    // 如果启用了摄像头，在选择区域时就开始预览
+    if (camera.enabled) {
+      const stream = await startVideo(camera.deviceId)
+      if (stream) {
+        cameraStreamRef.current = stream
+      }
+    }
     setRecordingStep('selecting')
-  }, [initSelectionBox])
+  }, [initSelectionBox, camera, startVideo])
 
   const handleCancelSelect = useCallback(() => {
     setSelectionBox(null)
     setRecordingStep('idle')
+    // 取消选择时停止摄像头预览
+    if (cameraStreamRef.current) {
+      cameraStreamRef.current.getTracks().forEach(track => track.stop())
+      cameraStreamRef.current = null
+    }
   }, [])
 
   const handleBoxChange = useCallback((newBox) => {
@@ -118,6 +196,26 @@ function AppWithSettings() {
       })
     }
 
+    // 如果启用了摄像头，初始化摄像头
+    if (camera.enabled) {
+      const stream = await startVideo(camera.deviceId)
+      if (stream) {
+        cameraStreamRef.current = stream
+        const video = document.createElement('video')
+        video.srcObject = stream
+        video.autoplay = true
+        video.muted = true
+        video.playsInline = true
+        await new Promise((resolve) => {
+          video.onloadedmetadata = () => {
+            video.play()
+            resolve()
+          }
+        })
+        videoRef.current = video
+      }
+    }
+
     const captureFrame = () => {
       if (!isCapturingRef.current) return
 
@@ -126,10 +224,8 @@ function AppWithSettings() {
 
       // 绘制背景
       if (bgImage) {
-        // 绘制图片背景
         ctx.drawImage(bgImage, 0, 0, totalWidth, totalHeight)
       } else {
-        // 绘制纯色背景
         ctx.fillStyle = bgValue || '#f5f5f5'
         ctx.fillRect(0, 0, totalWidth, totalHeight)
       }
@@ -156,7 +252,12 @@ function AppWithSettings() {
         margin, margin, selectionBox.width, selectionBox.height
       )
 
-      // 绘制鼠标指示器（相对于总画布）
+      // 绘制摄像头画面
+      if (camera.enabled && videoRef.current) {
+        drawCameraToCanvas(ctx, totalWidth, totalHeight)
+      }
+
+      // 绘制鼠标指示器
       const relX = mousePosRef.current.x - selectionBox.x + margin
       const relY = mousePosRef.current.y - selectionBox.y + margin
       
@@ -194,6 +295,13 @@ function AppWithSettings() {
         cancelAnimationFrame(animationFrameRef.current)
       }
       
+      // 停止摄像头
+      if (cameraStreamRef.current) {
+        cameraStreamRef.current.getTracks().forEach(track => track.stop())
+        cameraStreamRef.current = null
+      }
+      videoRef.current = null
+      
       if (chunksRef.current.length > 0) {
         const blob = new Blob(chunksRef.current, { type: 'video/webm' })
         const url = URL.createObjectURL(blob)
@@ -209,7 +317,7 @@ function AppWithSettings() {
     mediaRecorder.start(1000)
     mediaRecorderRef.current = mediaRecorder
     setRecordingStep('recording')
-  }, [selectionBox, mouseEffect, settings])
+  }, [selectionBox, mouseEffect, settings, camera, startVideo, drawCameraToCanvas])
 
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
@@ -219,6 +327,12 @@ function AppWithSettings() {
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current)
     }
+    // 清理摄像头
+    if (cameraStreamRef.current) {
+      cameraStreamRef.current.getTracks().forEach(track => track.stop())
+      cameraStreamRef.current = null
+    }
+    videoRef.current = null
     setRecordingStep('idle')
   }, [])
 
@@ -227,6 +341,10 @@ function AppWithSettings() {
       isCapturingRef.current = false
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current)
+      }
+      // 清理摄像头
+      if (cameraStreamRef.current) {
+        cameraStreamRef.current.getTracks().forEach(track => track.stop())
       }
     }
   }, [])
@@ -305,6 +423,20 @@ function AppWithSettings() {
         aspectRatio={aspectRatio}
         onCancel={handleCancelSelect}
       />
+      
+      {/* 在选择区域时显示摄像头预览 */}
+      {(recordingStep === 'selecting') && (
+        <CameraPreview
+          enabled={camera.enabled}
+          stream={cameraStreamRef.current}
+          shape={camera.shape}
+          size={camera.size}
+          position={camera.position}
+          offsetX={camera.offsetX}
+          offsetY={camera.offsetY}
+          selectionBox={selectionBox}
+        />
+      )}
       
       <main className="canvas-container">
         <Excalidraw 

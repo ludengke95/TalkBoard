@@ -18,9 +18,18 @@ export function useMediaDevices() {
   // 错误信息
   const [error, setError] = useState(null)
 
+  // 检查媒体设备 API 是否可用
+  const isMediaDevicesSupported = typeof navigator !== 'undefined' && navigator.mediaDevices && typeof navigator.mediaDevices.enumerateDevices === 'function'
+
   // 枚举所有媒体设备
   const enumerateDevices = useCallback(async () => {
     try {
+      if (!isMediaDevicesSupported) {
+        console.warn('浏览器不支持媒体设备 API')
+        setError('浏览器不支持媒体设备')
+        return
+      }
+
       setIsLoading(true)
       setError(null)
 
@@ -42,6 +51,8 @@ export function useMediaDevices() {
 
   // 初始化时枚举设备
   useEffect(() => {
+    if (!isMediaDevicesSupported) return
+
     enumerateDevices()
 
     // 监听设备变化
@@ -49,11 +60,16 @@ export function useMediaDevices() {
     return () => {
       navigator.mediaDevices.removeEventListener('devicechange', enumerateDevices)
     }
-  }, [enumerateDevices])
+  }, [enumerateDevices, isMediaDevicesSupported])
 
   // 开启摄像头
   const startVideo = useCallback(async (deviceId, constraints = {}) => {
     try {
+      if (!isMediaDevicesSupported) {
+        setError('浏览器不支持媒体设备')
+        return null
+      }
+
       setError(null)
       // 停止之前的流
       if (videoStream) {
@@ -88,6 +104,11 @@ export function useMediaDevices() {
   // 开启麦克风
   const startAudio = useCallback(async (deviceId) => {
     try {
+      if (!isMediaDevicesSupported) {
+        setError('浏览器不支持媒体设备')
+        return null
+      }
+
       setError(null)
       // 停止之前的流
       if (audioStream) {

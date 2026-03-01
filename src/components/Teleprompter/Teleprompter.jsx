@@ -3,8 +3,7 @@ import './Teleprompter.css'
 
 const STORAGE_KEY = 'byv-teleprompter-position'
 
-function Teleprompter({ content, onContentChange }) {
-  const [isVisible, setIsVisible] = useState(false)
+function Teleprompter({ theme, isVisible, onClose, content, onContentChange }) {
   const [percentPosition, setPercentPosition] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) {
@@ -37,7 +36,6 @@ function Teleprompter({ content, onContentChange }) {
   const teleprompterRef = useRef(null)
   const scrollIntervalRef = useRef(null)
 
-  // 监听窗口大小变化
   useEffect(() => {
     const handleResize = () => {
       if (!isDragging) {
@@ -54,12 +52,6 @@ function Teleprompter({ content, onContentChange }) {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(percentPosition))
   }, [percentPosition])
-
-  useEffect(() => {
-    if (content.trim() && !isVisible) {
-      setIsVisible(true)
-    }
-  }, [content, isVisible])
 
   useEffect(() => {
     if (isPlaying) {
@@ -111,14 +103,6 @@ function Teleprompter({ content, onContentChange }) {
     }
   }, [isDragging, handleDrag, handleDragEnd])
 
-  const handleToggle = useCallback(() => {
-    if (content.trim()) {
-      setIsVisible(!isVisible)
-    } else {
-      setIsVisible(true)
-    }
-  }, [content, isVisible])
-
   if (!isVisible) return null
 
   return (
@@ -131,33 +115,59 @@ function Teleprompter({ content, onContentChange }) {
       }}
     >
       <div className="teleprompter-header" onMouseDown={handleDragStart}>
-        提词器
+        <span className="teleprompter-title">提词器</span>
       </div>
       <div className="teleprompter-controls">
-        <label>
-          <span>速度</span>
+        <div className="control-group">
+          <span className="control-label">速度</span>
           <input 
             type="range" 
             min="1" 
             max="100" 
             value={speed} 
             onChange={e => setSpeed(Number(e.target.value))} 
+            className="control-slider"
           />
-        </label>
-        <label>
-          <span>透明度</span>
+          <span className="control-value">{speed}</span>
+        </div>
+        <div className="control-group">
+          <span className="control-label">透明度</span>
           <input 
             type="range" 
             min="0" 
             max="100" 
             value={opacity} 
             onChange={e => setOpacity(Number(e.target.value))} 
+            className="control-slider"
           />
-        </label>
-        <button onClick={() => setIsPlaying(!isPlaying)}>
-          {isPlaying ? '⏸' : '▶️'}
-        </button>
-        <button onClick={() => setIsVisible(false)} className="close-btn">×</button>
+          <span className="control-value">{opacity}</span>
+        </div>
+        <div className="control-buttons">
+          <button 
+            className="control-btn" 
+            onClick={() => setIsPlaying(!isPlaying)}
+            title={isPlaying ? '暂停' : '播放'}
+          >
+            {isPlaying ? (
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
+              </svg>
+            ) : (
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+              </svg>
+            )}
+          </button>
+          <button 
+            className="control-btn close-btn" 
+            onClick={onClose}
+            title="关闭"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
       </div>
       <textarea 
         ref={teleprompterRef}

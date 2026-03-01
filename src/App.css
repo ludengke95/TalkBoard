@@ -44,14 +44,21 @@ body {
   align-items: center;
   justify-content: center;
   z-index: 2000;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .settings-modal {
-  background: #fff;
-  border-radius: 12px;
+  background: var(--bg-primary);
+  border-radius: var(--radius-xl);
   min-width: 500px;
   min-height: 400px;
   overflow: hidden;
+  box-shadow: var(--shadow-lg);
 }
 
 .modal-header {
@@ -59,36 +66,40 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-primary);
 }
 
 .modal-header h3 {
   margin: 0;
   font-size: 18px;
+  color: var(--text-primary);
 }
 
 .modal-close {
   background: none;
   border: none;
-  font-size: 24px;
   cursor: pointer;
-  color: #666;
+  color: var(--text-secondary);
   padding: 0;
   width: 32px;
   height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
 }
 
 .modal-close:hover {
-  background: #f5f5f5;
+  background: var(--bg-secondary);
 }
 
 .modal-body {
   padding: 20px;
   min-height: 300px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 /* 设置弹窗样式扩展 */
@@ -104,7 +115,8 @@ body {
   display: flex;
   gap: 4px;
   padding: 12px 20px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-primary);
   overflow-x: auto;
   flex-shrink: 0;
 }
@@ -113,70 +125,74 @@ body {
   padding: 8px 16px;
   background: transparent;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 13px;
-  color: #666;
+  color: var(--text-secondary);
   white-space: nowrap;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
 }
 
 .settings-tab:hover {
-  background: #f5f5f5;
+  background: var(--bg-secondary);
 }
 
 .settings-tab.active {
-  background: #1976d2;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--bg-primary);
 }
 
 .settings-body {
   flex: 1;
   overflow-y: auto;
   padding: 20px;
+  background: var(--bg-primary);
 }
 
 .modal-footer {
   display: flex;
   justify-content: space-between;
   padding: 16px 20px;
-  border-top: 1px solid #eee;
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-primary);
   flex-shrink: 0;
 }
 
 .btn-reset {
   padding: 10px 20px;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 14px;
-  color: #666;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
 }
 
 .btn-reset:hover {
-  background: #f5f5f5;
+  background: var(--bg-secondary);
 }
 
 .btn-done {
   padding: 10px 24px;
-  background: #1976d2;
+  background: var(--color-primary);
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 14px;
-  color: #fff;
+  color: var(--bg-primary);
+  transition: all var(--transition-fast);
 }
 
 .btn-done:hover {
-  background: #1565c0;
+  background: var(--color-primary-hover);
 }
 
 /* 设置区块 */
 .setting-section {
   margin-bottom: 28px;
   padding-bottom: 20px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-light);
 }
 
 .setting-section:last-child {
@@ -187,13 +203,13 @@ body {
   margin: 0 0 12px;
   font-size: 15px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .setting-desc {
   margin: 0 0 12px;
   font-size: 13px;
-  color: #888;
+  color: var(--text-muted);
 }
 
 .setting-row {
@@ -205,7 +221,7 @@ body {
 .setting-label {
   min-width: 80px;
   font-size: 13px;
-  color: #555;
+  color: var(--text-secondary);
 }
 
 /* 开关样式 */
@@ -215,6 +231,7 @@ body {
   gap: 10px;
   cursor: pointer;
   font-size: 14px;
+  color: var(--text-primary);
 }
 
 .toggle-input {
@@ -224,7 +241,7 @@ body {
 .toggle-switch {
   width: 44px;
   height: 24px;
-  background: #ccc;
+  background: var(--border-color);
   border-radius: 12px;
   position: relative;
   transition: background 0.3s;
@@ -235,7 +252,7 @@ body {
   position: absolute;
   width: 20px;
   height: 20px;
-  background: #fff;
+  background: var(--bg-primary);
   border-radius: 50%;
   top: 2px;
   left: 2px;
@@ -243,7 +260,7 @@ body {
 }
 
 .toggle-input:checked + .toggle-switch {
-  background: #4caf50;
+  background: var(--color-success);
 }
 
 .toggle-input:checked + .toggle-switch::after {
@@ -262,19 +279,19 @@ body {
   flex-direction: column;
   align-items: center;
   padding: 12px 8px;
-  border: 2px solid #eee;
+  border: 2px solid var(--border-color);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .aspect-ratio-option:hover {
-  border-color: #bbb;
+  border-color: var(--border-color);
 }
 
 .aspect-ratio-option.selected {
-  border-color: #1976d2;
-  background: #f0f7ff;
+  border-color: var(--color-primary);
+  background: var(--bg-secondary);
 }
 
 .aspect-ratio-option input {
@@ -284,12 +301,12 @@ body {
 .ratio-label {
   font-size: 15px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .ratio-desc {
   font-size: 11px;
-  color: #888;
+  color: var(--text-muted);
   margin-top: 4px;
 }
 
@@ -303,14 +320,16 @@ body {
 .custom-ratio-input input {
   width: 80px;
   padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
   font-size: 14px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .custom-ratio-input span {
   font-size: 16px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 /* 背景选择 */
@@ -326,26 +345,26 @@ body {
   flex-direction: column;
   align-items: center;
   padding: 8px;
-  border: 2px solid #eee;
+  border: 2px solid var(--border-color);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .background-option:hover {
-  border-color: #bbb;
+  border-color: var(--border-color);
 }
 
 .background-option.selected {
-  border-color: #1976d2;
-  background: #f0f7ff;
+  border-color: var(--color-primary);
+  background: var(--bg-secondary);
 }
 
 .color-thumb {
   width: 60px;
   height: 40px;
   border-radius: 4px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
 }
 
 .image-thumb {
@@ -357,7 +376,7 @@ body {
 
 .background-name {
   font-size: 11px;
-  color: #666;
+  color: var(--text-secondary);
   margin-top: 6px;
   text-align: center;
 }
@@ -369,7 +388,7 @@ body {
 .custom-background h5 {
   margin: 0 0 8px;
   font-size: 13px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .color-picker-row,
@@ -383,31 +402,36 @@ body {
   width: 40px;
   height: 32px;
   padding: 0;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
   cursor: pointer;
+  background: var(--bg-primary);
 }
 
 .color-text {
   width: 100px;
   padding: 6px 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
   font-size: 13px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .url-input {
   flex: 1;
   padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
   font-size: 13px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .url-submit-btn {
   padding: 8px 16px;
-  background: #1976d2;
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--bg-primary);
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -415,7 +439,7 @@ body {
 }
 
 .url-submit-btn:hover {
-  background: #1565c0;
+  background: var(--color-primary-hover);
 }
 
 /* 圆角半径 */
@@ -423,7 +447,7 @@ body {
   display: flex;
   justify-content: center;
   padding: 20px;
-  background: #f9f9f9;
+  background: var(--bg-secondary);
   border-radius: 8px;
   margin-bottom: 16px;
 }
@@ -431,13 +455,13 @@ body {
 .preview-box {
   width: 120px;
   height: 80px;
-  background: #fff;
-  border: 2px solid #1976d2;
+  background: var(--bg-primary);
+  border: 2px solid var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .corner-radius-presets {
@@ -449,22 +473,27 @@ body {
 
 .preset-btn {
   padding: 6px 12px;
-  background: #fff;
-  border: 1px solid #ddd;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   cursor: pointer;
   font-size: 12px;
-  color: #555;
+  color: var(--text-secondary);
 }
 
 .preset-btn:hover {
-  border-color: #1976d2;
+  border-color: var(--color-primary);
 }
 
 .preset-btn.active {
-  background: #1976d2;
-  border-color: #1976d2;
-  color: #fff;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--bg-primary);
+}
+
+.slider-label {
+  font-size: 13px;
+  color: var(--text-secondary);
 }
 
 .corner-radius-slider,
@@ -479,7 +508,7 @@ body {
   flex: 1;
   height: 4px;
   -webkit-appearance: none;
-  background: #ddd;
+  background: var(--border-color);
   border-radius: 2px;
   outline: none;
 }
@@ -488,7 +517,7 @@ body {
   -webkit-appearance: none;
   width: 16px;
   height: 16px;
-  background: #1976d2;
+  background: var(--color-primary);
   border-radius: 50%;
   cursor: pointer;
 }
@@ -496,7 +525,7 @@ body {
 .slider-value {
   min-width: 50px;
   font-size: 13px;
-  color: #666;
+  color: var(--text-secondary);
   text-align: right;
 }
 
@@ -505,14 +534,14 @@ body {
   display: flex;
   justify-content: center;
   padding: 16px;
-  background: #f9f9f9;
+  background: var(--bg-secondary);
   border-radius: 8px;
   margin-bottom: 16px;
 }
 
 .preview-video {
   object-fit: cover;
-  border: 2px solid #1976d2;
+  border: 2px solid var(--color-primary);
 }
 
 .preview-video.circle {
@@ -522,22 +551,23 @@ body {
 .preview-placeholder {
   width: 120px;
   height: 90px;
-  background: #ddd;
+  background: var(--border-color);
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 12px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .setting-select {
   flex: 1;
   padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
   font-size: 13px;
-  background: #fff;
+  background: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .shape-options,
@@ -549,24 +579,24 @@ body {
 .shape-btn,
 .position-btn {
   padding: 6px 14px;
-  background: #fff;
-  border: 1px solid #ddd;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   cursor: pointer;
   font-size: 13px;
-  color: #555;
+  color: var(--text-secondary);
 }
 
 .shape-btn:hover,
 .position-btn:hover {
-  border-color: #1976d2;
+  border-color: var(--color-primary);
 }
 
 .shape-btn.active,
 .position-btn.active {
-  background: #1976d2;
-  border-color: #1976d2;
-  color: #fff;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: var(--bg-primary);
 }
 
 /* 麦克风设置 */
@@ -575,21 +605,21 @@ body {
   align-items: center;
   gap: 12px;
   padding: 12px;
-  background: #f9f9f9;
+  background: var(--bg-secondary);
   border-radius: 8px;
   margin-bottom: 16px;
 }
 
 .audio-label {
   font-size: 13px;
-  color: #666;
+  color: var(--text-secondary);
   min-width: 40px;
 }
 
 .audio-meter {
   flex: 1;
   height: 8px;
-  background: #ddd;
+  background: var(--border-color);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -601,13 +631,13 @@ body {
 
 .audio-status {
   font-size: 12px;
-  color: #888;
+  color: var(--text-muted);
   min-width: 50px;
 }
 
 .loading-tip {
   font-size: 12px;
-  color: #888;
+  color: var(--text-muted);
   font-style: italic;
 }
 
@@ -617,14 +647,14 @@ body {
   align-items: center;
   gap: 16px;
   padding: 16px;
-  background: #f9f9f9;
+  background: var(--bg-secondary);
   border-radius: 8px;
   margin-bottom: 16px;
 }
 
 .preview-label {
   font-size: 13px;
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .preview-cursor {
@@ -650,7 +680,7 @@ body {
 .color-preset-btn {
   width: 32px;
   height: 32px;
-  border: 2px solid #eee;
+  border: 2px solid var(--border-color);
   border-radius: 50%;
   cursor: pointer;
   display: flex;
@@ -664,11 +694,11 @@ body {
 }
 
 .color-preset-btn.active {
-  border-color: #333;
+  border-color: var(--text-primary);
 }
 
 .check-mark {
-  color: #fff;
+  color: var(--bg-primary);
   font-size: 14px;
   text-shadow: 0 1px 2px rgba(0,0,0,0.5);
 }
@@ -683,17 +713,20 @@ body {
   width: 40px;
   height: 32px;
   padding: 0;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
   cursor: pointer;
+  background: var(--bg-primary);
 }
 
 .color-text-input {
   width: 100px;
   padding: 6px 10px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
   font-size: 13px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 .current-color {
@@ -701,7 +734,7 @@ body {
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: #666;
+  color: var(--text-secondary);
   margin-top: 12px;
 }
 
@@ -709,14 +742,14 @@ body {
   width: 20px;
   height: 20px;
   border-radius: 4px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
 }
 
 /* 边距设置 */
 .margin-preview {
   position: relative;
   height: 160px;
-  background: #f9f9f9;
+  background: var(--bg-secondary);
   border-radius: 8px;
   margin-bottom: 16px;
   overflow: hidden;
@@ -739,7 +772,7 @@ body {
 .preview-recording {
   position: absolute;
   background: rgba(255,255,255,0.9);
-  border: 2px dashed #1976d2;
+  border: 2px dashed var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -747,7 +780,7 @@ body {
 
 .recording-label {
   font-size: 12px;
-  color: #1976d2;
+  color: var(--color-primary);
 }
 
 .margin-presets {
@@ -759,6 +792,6 @@ body {
 
 .margin-tip {
   font-size: 12px;
-  color: #888;
+  color: var(--text-muted);
   margin-top: 8px;
 }

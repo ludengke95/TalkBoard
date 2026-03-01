@@ -31,7 +31,7 @@
 
 .selection-box.recording {
   border-style: solid;
-  border-color: #f44336;
+  border-color: var(--color-danger);
 }
 
 .selection-box.locked {
@@ -44,7 +44,7 @@
   top: -24px;
   left: 50%;
   transform: translateX(-50%);
-  background: #f44336;
+  background: var(--color-danger);
   color: white;
   padding: 2px 8px;
   border-radius: 4px;
@@ -63,7 +63,7 @@
   width: 10px;
   height: 10px;
   background: white;
-  border: 2px solid #333;
+  border: 2px solid var(--text-primary);
   border-radius: 2px;
 }
 

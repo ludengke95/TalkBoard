@@ -9,6 +9,8 @@ const STORAGE_KEY = 'byv-settings'
 
 // 默认设置值
 const defaultSettings = {
+  // 主题模式
+  theme: 'light',
   // 1. 画面比例
   aspectRatio: '16:9',
   // 2. 背景设置

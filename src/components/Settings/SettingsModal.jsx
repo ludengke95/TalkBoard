@@ -1,6 +1,6 @@
 /**
  * 设置弹窗主组件
- * 整合所有设置模块 - 左右布局：左侧预览，右侧配置
+ * 单栏紧凑布局 - 预览区在上，配置项在下
  */
 import { useEffect } from "react";
 import { useSettings } from "../../contexts/SettingsContext";
@@ -26,9 +26,8 @@ function SettingsModal({ onClose }) {
     }
   }, [settings.camera.enabled, settings.camera.deviceId]);
 
-  // 计算画面比例
   const getAspectRatioStyle = () => {
-    let ratio = 16 / 9; // 默认
+    let ratio = 16 / 9;
     if (settings.aspectRatio && settings.aspectRatio.includes(":")) {
       const [w, h] = settings.aspectRatio.split(":").map(Number);
       if (w && h) {
@@ -39,27 +38,8 @@ function SettingsModal({ onClose }) {
   };
 
   const aspectRatio = getAspectRatioStyle();
-
-  // 计算预览尺寸
-  const MAX_PREVIEW_SIZE = 380;
-
-  const getPreviewSize = () => {
-    if (aspectRatio >= 1) {
-      // 横屏：宽度优先，最大宽度280
-      return {
-        width: Math.min(MAX_PREVIEW_SIZE, MAX_PREVIEW_SIZE),
-        height: Math.min(MAX_PREVIEW_SIZE / aspectRatio, MAX_PREVIEW_SIZE),
-      };
-    } else {
-      // 竖屏：高度优先，最大高度280
-      return {
-        width: Math.min(MAX_PREVIEW_SIZE * aspectRatio, MAX_PREVIEW_SIZE),
-        height: Math.min(MAX_PREVIEW_SIZE, MAX_PREVIEW_SIZE),
-      };
-    }
-  };
-
-  const previewSize = getPreviewSize();
+  const previewWidth = 220;
+  const previewHeight = previewWidth / aspectRatio;
 
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -68,27 +48,27 @@ function SettingsModal({ onClose }) {
         onClick={(e) => e.stopPropagation()}
       >
         {/* 头部 */}
-        <div className="modal-header">
+        <div className="settings-header">
           <h3>设置</h3>
-          <button className="modal-close" onClick={onClose}>
-            ×
+          <button className="close-btn" onClick={onClose}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         </div>
 
-        {/* 主内容区 - 左右布局 */}
-        <div className="settings-container">
-          {/* 左侧预览区 */}
-          <div className="settings-preview">
-            <div className="preview-label">预览</div>
-            <div className="preview-content">
+        {/* 主体内容 */}
+        <div className="settings-body">
+          {/* 预览区 */}
+          <div className="preview-section">
+            <div className="preview-canvas-wrapper">
               <div
                 className="preview-canvas"
                 style={{
-                  width: previewSize.width,
-                  height: previewSize.height,
+                  width: previewWidth,
+                  height: previewHeight,
                 }}
               >
-                {/* 背景层 */}
                 <div
                   className="preview-background"
                   style={{
@@ -104,14 +84,12 @@ function SettingsModal({ onClose }) {
                     backgroundPosition: "center",
                   }}
                 />
-                {/* 录制区域层 - 用 padding 控制边距 */}
                 <div
                   className="preview-recording-area"
                   style={{
                     padding: settings.margin ? `${settings.margin}px` : 0,
                   }}
                 >
-                  {/* 白色录制内容层 - 圆角 */}
                   <div
                     className="preview-recording-content"
                     style={{
@@ -121,8 +99,7 @@ function SettingsModal({ onClose }) {
                     }}
                   >
                     <div className="preview-whiteboard">
-                      <span>白板区域</span>
-                      {/* 鼠标高亮效果预览 */}
+                      <span>预览</span>
                       {settings.mouseEffect.enabled && (
                         <div
                           className="preview-mouse-effect"
@@ -132,36 +109,35 @@ function SettingsModal({ onClose }) {
                         />
                       )}
                     </div>
-                    {/* 摄像头预览 */}
                     <CameraPreview videoStream={videoStream} />
                   </div>
                 </div>
               </div>
+              <span className="preview-hint">录制效果预览</span>
             </div>
           </div>
 
-          {/* 右侧配置区 */}
-          <div className="settings-config">
-            <div className="settings-scroll">
-              <AspectRatioSetting />
-              <BackgroundSetting />
-              <CornerRadiusSetting />
-              <CameraSetting />
-              <MicrophoneSetting />
-              <MouseEffectSetting />
-              <MarginSetting />
-            </div>
+          {/* 配置项列表 */}
+          <div className="settings-list">
+            <AspectRatioSetting />
+            <BackgroundSetting />
+            <CornerRadiusSetting />
+            <CameraSetting />
+            <MicrophoneSetting />
+            <MouseEffectSetting />
+            <MarginSetting />
           </div>
-        </div>
 
-        {/* 底部按钮 */}
-        <div className="modal-footer">
-          <button className="btn-reset" onClick={resetSettings}>
-            重置为默认
-          </button>
-          <button className="btn-done" onClick={onClose}>
-            完成
-          </button>
+          {/* 底部操作区 */}
+          <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+            <button 
+              className="btn-reset" 
+              onClick={resetSettings}
+              style={{ padding: '8px 16px', fontSize: '13px' }}
+            >
+              重置
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -175,19 +151,19 @@ function CameraPreview({ videoStream }) {
   if (!camera.enabled) return null;
 
   const positionStyle = {
-    "bottom-right": { right: 10, bottom: 10 },
-    "bottom-left": { left: 10, bottom: 10 },
-    "top-right": { right: 10, top: 10 },
-    "top-left": { left: 10, top: 10 },
-  }[camera.position] || { right: 10, bottom: 10 };
+    "bottom-right": { right: 8, bottom: 8 },
+    "bottom-left": { left: 8, bottom: 8 },
+    "top-right": { right: 8, top: 8 },
+    "top-left": { left: 8, top: 8 },
+  }[camera.position] || { right: 8, bottom: 8 };
 
   return (
     <div
       className={`camera-overlay ${camera.shape}`}
       style={{
         ...positionStyle,
-        width: camera.size,
-        height: camera.shape === "circle" ? camera.size : camera.size * 0.75,
+        width: camera.size * 0.5,
+        height: camera.shape === "circle" ? camera.size * 0.5 : camera.size * 0.375,
       }}
     >
       {videoStream && (

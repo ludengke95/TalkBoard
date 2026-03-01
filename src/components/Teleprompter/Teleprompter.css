@@ -2,13 +2,28 @@
   position: fixed;
   width: 400px;
   max-width: 90vw;
-  background: rgba(30, 30, 30, 0.95);
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  background: var(--toolbar-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--toolbar-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
   z-index: 1001;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  animation: slideIn 0.2s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .teleprompter-container.dragging {
@@ -16,62 +31,119 @@
 }
 
 .teleprompter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.05);
-  color: #fff;
-  font-weight: 500;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
   cursor: move;
   user-select: none;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.teleprompter-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
 }
 
 .teleprompter-controls {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background: rgba(0, 0, 0, 0.2);
+  gap: 16px;
+  padding: 10px 16px;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-light);
   flex-wrap: wrap;
 }
 
-.teleprompter-controls label {
+.control-group {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #aaa;
+}
+
+.control-label {
   font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
 }
 
-.teleprompter-controls input[type="range"] {
-  width: 80px;
+.control-slider {
+  width: 70px;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--border-color);
+  border-radius: 2px;
+  outline: none;
   cursor: pointer;
 }
 
-.teleprompter-controls button {
-  width: 32px;
-  height: 32px;
+.control-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  background: var(--color-primary);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+}
+
+.control-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.control-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: var(--color-primary);
+  border-radius: 50%;
   border: none;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
   cursor: pointer;
-  font-size: 14px;
+}
+
+.control-value {
+  font-size: 11px;
+  color: var(--text-muted);
+  min-width: 24px;
+  text-align: right;
+}
+
+.control-buttons {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.control-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s ease;
+  transition: all var(--transition-fast);
+  color: var(--text-secondary);
 }
 
-.teleprompter-controls button:hover {
-  background: rgba(255, 255, 255, 0.2);
+.control-btn:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
 }
 
-.teleprompter-controls .close-btn {
-  background: rgba(244, 67, 54, 0.3);
-  color: #f44336;
+.control-btn svg {
+  width: 14px;
+  height: 14px;
 }
 
-.teleprompter-controls .close-btn:hover {
-  background: rgba(244, 67, 54, 0.5);
+.control-btn.close-btn:hover {
+  background: var(--color-danger);
+  color: white;
 }
 
 .teleprompter-content {
@@ -81,13 +153,33 @@
   padding: 16px;
   background: transparent;
   border: none;
-  color: #fff;
-  font-size: 16px;
+  color: var(--text-primary);
+  font-size: 15px;
   line-height: 1.8;
   resize: vertical;
   outline: none;
+  font-family: inherit;
 }
 
 .teleprompter-content::placeholder {
-  color: #666;
+  color: var(--text-muted);
+}
+
+.teleprompter-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.teleprompter-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.teleprompter-content::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .teleprompter-container {
+    animation: none;
+  }
 }

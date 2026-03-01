@@ -24,8 +24,8 @@ import CameraPreview from "./components/CameraPreview/CameraPreview";
 import "./App.css";
 
 function AppWithSettings() {
-  const { settings } = useSettings();
-  const { mouseEffect, aspectRatio, cornerRadius, camera } = settings;
+  const { settings, updateSetting } = useSettings();
+  const { mouseEffect, aspectRatio, cornerRadius, camera, theme } = settings;
   const { enumerateDevices, startVideo, stopVideo } = useMediaDevices();
 
   const excalidrawRef = useRef(null);
@@ -36,6 +36,7 @@ function AppWithSettings() {
 
   const [showSettings, setShowSettings] = useState(false);
   const [teleprompterContent, setTeleprompterContent] = useState("");
+  const [teleprompterVisible, setTeleprompterVisible] = useState(false);
 
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
@@ -415,6 +416,48 @@ function AppWithSettings() {
     }
   }, [recordingStep, startRecording]);
 
+  // 同步主题到 html 元素
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  // 监听 Excalidraw 主题变化 - 通过 DOM 检测
+  useEffect(() => {
+    const checkExcalidrawTheme = () => {
+      const excalidrawEl = document.querySelector('.excalidraw');
+      if (excalidrawEl) {
+        const isDark = excalidrawEl.classList.contains('theme--dark');
+        const currentTheme = isDark ? 'dark' : 'light';
+        if (currentTheme !== theme) {
+          updateSetting('theme', currentTheme);
+        }
+      }
+    };
+
+    // 初始检查
+    checkExcalidrawTheme();
+
+    // 使用 MutationObserver 监听 DOM 变化
+    const observer = new MutationObserver(checkExcalidrawTheme);
+    
+    const intervalId = setInterval(() => {
+      const excalidrawEl = document.querySelector('.excalidraw');
+      if (excalidrawEl && !observer.observe.called) {
+        observer.observe(excalidrawEl, { 
+          attributes: true, 
+          attributeFilter: ['class'] 
+        });
+        observer.observe.called = true;
+      }
+      checkExcalidrawTheme();
+    }, 500);
+
+    return () => {
+      clearInterval(intervalId);
+      observer.disconnect();
+    };
+  }, [theme, updateSetting]);
+
   const handleRecordClick = useCallback(() => {
     if (recordingStep === "idle") {
       handleStartSelect();
@@ -452,16 +495,20 @@ function AppWithSettings() {
   return (
     <div className="app">
       <Toolbar
+        theme={theme}
         onSettingsClick={() => setShowSettings(!showSettings)}
-        onTeleprompterClick={() => {}}
+        onTeleprompterClick={() => setTeleprompterVisible(!teleprompterVisible)}
         onRecordClick={handleRecordClick}
         recordingStep={recordingStep}
         hasTeleprompterContent={teleprompterContent.trim().length > 0}
       />
 
-      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
+      {showSettings && <SettingsModal theme={theme} onClose={() => setShowSettings(false)} />}
 
       <Teleprompter
+        theme={theme}
+        isVisible={teleprompterVisible}
+        onClose={() => setTeleprompterVisible(false)}
         content={teleprompterContent}
         onContentChange={setTeleprompterContent}
       />
@@ -503,6 +550,11 @@ function AppWithSettings() {
             excalidrawRef.current = api;
           }}
           langCode="zh-CN"
+          UIOptions={{
+            canvasActions: {
+              toggleTheme: true
+            }
+          }}
         />
       </main>
     </div>

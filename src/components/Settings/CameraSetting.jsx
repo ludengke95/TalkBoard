@@ -1,6 +1,6 @@
 /**
  * 摄像头设置组件
- * 设置摄像头的开关、形状、大小和位置
+ * 简洁单栏样式
  */
 import { useState } from 'react'
 import { useSettings } from '../../contexts/SettingsContext'
@@ -11,148 +11,59 @@ function CameraSetting() {
   const { camera } = settings
   const { videoDevices } = useMediaDevices()
   
-  // 本地状态
   const [selectedDevice, setSelectedDevice] = useState(camera.deviceId || '')
 
-  // 处理摄像头开关
-  const handleToggle = (enabled) => {
-    updateSetting('camera', {
-      ...camera,
-      enabled
-    })
-  }
-
-  // 处理形状切换
-  const handleShapeChange = (shape) => {
-    updateSetting('camera', {
-      ...camera,
-      shape
-    })
-  }
-
-  // 处理大小调整
-  const handleSizeChange = (size) => {
-    updateSetting('camera', {
-      ...camera,
-      size
-    })
-  }
-
-  // 处理设备选择
-  const handleDeviceChange = (deviceId) => {
-    setSelectedDevice(deviceId)
-    updateSetting('camera', {
-      ...camera,
-      deviceId
-    })
-  }
-
-  // 位置选项
-  const positions = [
-    { value: 'bottom-right', label: '右下角' },
-    { value: 'bottom-left', label: '左下角' },
-    { value: 'top-right', label: '右上角' },
-    { value: 'top-left', label: '左上角' }
-  ]
-
-  // 形状选项
   const shapes = [
     { value: 'circle', label: '圆形' },
     { value: 'square', label: '方形' }
   ]
 
+  const positions = [
+    { value: 'bottom-right', label: '右下' },
+    { value: 'bottom-left', label: '左下' },
+    { value: 'top-right', label: '右上' },
+    { value: 'top-left', label: '左上' }
+  ]
+
   return (
-    <div className="setting-section">
-      <h4 className="setting-title">摄像头</h4>
-      
-      {/* 开关 */}
-      <div className="setting-row">
-        <label className="toggle-label">
-          <input
-            type="checkbox"
-            checked={camera.enabled}
-            onChange={(e) => handleToggle(e.target.checked)}
-            className="toggle-input"
-          />
-          <span className="toggle-switch"></span>
-          <span>启用摄像头</span>
-        </label>
-      </div>
-
-      {camera.enabled && (
-        <>
-          {/* 设备选择 */}
-          <div className="setting-row">
-            <label className="setting-label">选择摄像头</label>
-            <select
-              value={selectedDevice}
-              onChange={(e) => handleDeviceChange(e.target.value)}
-              className="setting-select"
-            >
-              {videoDevices.length === 0 ? (
-                <option value="">未检测到摄像头</option>
-              ) : (
-                <>
-                  <option value="">默认摄像头</option>
-                  {videoDevices.map((device, index) => (
-                    <option key={device.deviceId} value={device.deviceId}>
-                      {device.label || `摄像头 ${index + 1}`}
-                    </option>
-                  ))}
-                </>
-              )}
-            </select>
-          </div>
-
-          {/* 形状选择 */}
-          <div className="setting-row">
-            <label className="setting-label">画面形状</label>
-            <div className="shape-options">
+    <div className="setting-item">
+      <span className="setting-item-label">摄像头</span>
+      <div className="setting-item-control">
+        <button
+          className={`toggle-switch ${camera.enabled ? 'active' : ''}`}
+          onClick={() => updateSetting('camera', { ...camera, enabled: !camera.enabled })}
+        />
+        {camera.enabled && (
+          <>
+            <div className="radio-group" style={{ marginLeft: '12px' }}>
               {shapes.map(shape => (
                 <button
                   key={shape.value}
-                  className={`shape-btn ${camera.shape === shape.value ? 'active' : ''}`}
-                  onClick={() => handleShapeChange(shape.value)}
+                  className={`radio-btn ${camera.shape === shape.value ? 'active' : ''}`}
+                  onClick={() => updateSetting('camera', { ...camera, shape: shape.value })}
                 >
                   {shape.label}
                 </button>
               ))}
             </div>
-          </div>
-
-          {/* 大小调整 */}
-          <div className="setting-row">
-            <label className="setting-label">画面大小</label>
-            <div className="size-slider">
-              <input
-                type="range"
-                min="60"
-                max="300"
-                value={camera.size}
-                onChange={(e) => handleSizeChange(Number(e.target.value))}
-                className="slider-input"
-              />
-              <span className="slider-value">{camera.size}px</span>
-            </div>
-          </div>
-
-          {/* 位置选择 */}
-          <div className="setting-row">
-            <label className="setting-label">显示位置</label>
-            <div className="position-options">
-              {positions.map(pos => (
-                <button
-                  key={pos.value}
-                  className={`position-btn ${camera.position === pos.value ? 'active' : ''}`}
-                  onClick={() => updateSetting('camera', { ...camera, position: pos.value })}
-                >
-                  {pos.label}
-                </button>
+            <select
+              value={selectedDevice}
+              onChange={(e) => {
+                setSelectedDevice(e.target.value)
+                updateSetting('camera', { ...camera, deviceId: e.target.value })
+              }}
+              style={{ marginLeft: '8px', padding: '4px 8px', fontSize: '12px', borderRadius: '4px' }}
+            >
+              <option value="">默认</option>
+              {videoDevices.map((device, index) => (
+                <option key={device.deviceId} value={device.deviceId}>
+                  {device.label || `摄像头 ${index + 1}`}
+                </option>
               ))}
-            </div>
-          </div>
-        </>
-      )}
+            </select>
+          </>
+        )}
+      </div>
     </div>
   )
 }

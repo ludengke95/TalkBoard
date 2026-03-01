@@ -25,7 +25,7 @@ import "./App.css";
 
 function AppWithSettings() {
   const { settings, updateSetting } = useSettings();
-  const { mouseEffect, aspectRatio, cornerRadius, camera, theme } = settings;
+  const { mouseEffect, aspectRatio, cornerRadius, camera, microphone, theme } = settings;
   const { enumerateDevices, startVideo, stopVideo } = useMediaDevices();
 
   const excalidrawRef = useRef(null);
@@ -45,6 +45,7 @@ function AppWithSettings() {
   const isCapturingRef = useRef(false);
   const videoRef = useRef(null);
   const cameraStreamRef = useRef(null);
+  const audioStreamRef = useRef(null);
 
   // 绘制摄像头画面到画布
   const drawCameraToCanvas = useCallback(
@@ -141,18 +142,6 @@ function AppWithSettings() {
 
     setSelectionBox({ x, y, width, height });
   }, [aspectRatio]);
-
-  useEffect(() => {
-    const requestPermissions = async () => {
-      try {
-        await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-        enumerateDevices();
-      } catch (err) {
-        console.warn("请求媒体权限失败:", err);
-      }
-    };
-    requestPermissions();
-  }, [enumerateDevices]);
 
   const handleStartSelect = useCallback(async () => {
     initSelectionBox();
@@ -303,7 +292,25 @@ function AppWithSettings() {
     isCapturingRef.current = true;
     captureFrame();
 
+    // 创建视频流
     const stream = recordCanvas.captureStream(60);
+
+    // 如果启用了麦克风，添加音频轨道
+    if (microphone.enabled) {
+      try {
+        const audioStream = await navigator.mediaDevices.getUserMedia({
+          audio: microphone.deviceId ? { deviceId: { exact: microphone.deviceId } } : true
+        });
+        audioStreamRef.current = audioStream;
+        // 将音频轨道添加到视频流
+        audioStream.getAudioTracks().forEach(track => {
+          stream.addTrack(track);
+        });
+      } catch (err) {
+        console.warn('获取麦克风失败:', err);
+      }
+    }
+
     const mediaRecorder = new MediaRecorder(stream, {
       mimeType: "video/webm;codecs=vp9",
     });
@@ -328,6 +335,12 @@ function AppWithSettings() {
         cameraStreamRef.current = null;
       }
       videoRef.current = null;
+
+      // 停止麦克风
+      if (audioStreamRef.current) {
+        audioStreamRef.current.getTracks().forEach((track) => track.stop());
+        audioStreamRef.current = null;
+      }
 
       if (chunksRef.current.length > 0) {
         const webmBlob = new Blob(chunksRef.current, { type: "video/webm" });
@@ -405,6 +418,10 @@ function AppWithSettings() {
       // 清理摄像头
       if (cameraStreamRef.current) {
         cameraStreamRef.current.getTracks().forEach((track) => track.stop());
+      }
+      // 清理麦克风
+      if (audioStreamRef.current) {
+        audioStreamRef.current.getTracks().forEach((track) => track.stop());
       }
     };
   }, []);

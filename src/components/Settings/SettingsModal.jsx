@@ -16,7 +16,38 @@ import "./SettingsModal.css";
 
 function SettingsModal({ onClose }) {
   const { settings, resetSettings } = useSettings();
-  const { videoStream, startVideo, stopVideo } = useMediaDevices();
+  const { videoStream, startVideo, stopVideo, enumerateDevices } = useMediaDevices();
+
+  // 打开设置时获取设备列表并请求权限
+  useEffect(() => {
+    const initDevices = async () => {
+      try {
+        // 先获取设备列表（不需要权限）
+        await enumerateDevices();
+        
+        // 然后尝试请求权限（用于获取更完整的设备信息）
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const hasVideo = devices.some(d => d.kind === 'videoinput');
+        const hasAudio = devices.some(d => d.kind === 'audioinput');
+        
+        if (hasVideo || hasAudio) {
+          try {
+            await navigator.mediaDevices.getUserMedia({ 
+              video: hasVideo, 
+              audio: hasAudio 
+            });
+            // 重新获取设备列表以获取更完整的信息
+            await enumerateDevices();
+          } catch (e) {
+            // 权限被拒绝或其他错误，静默处理
+          }
+        }
+      } catch (err) {
+        console.warn("获取设备列表失败:", err.message);
+      }
+    };
+    initDevices();
+  }, [enumerateDevices]);
 
   useEffect(() => {
     if (settings.camera.enabled && settings.camera.deviceId) {

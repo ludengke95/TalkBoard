@@ -5,6 +5,7 @@
 import { useEffect } from 'react'
 import { useSettings } from '../../contexts/SettingsContext'
 import { useMediaDevices } from '../../hooks/useMediaDevices'
+import Select from './Select'
 
 function MicrophoneSetting() {
   const { settings, updateSetting } = useSettings()
@@ -19,6 +20,14 @@ function MicrophoneSetting() {
     }
     return () => stopAudio()
   }, [microphone.enabled])
+
+  const deviceOptions = [
+    { value: '', label: '默认' },
+    ...audioDevices.map((device, index) => ({
+      value: device.deviceId,
+      label: device.label || `麦克风 ${index + 1}`
+    }))
+  ]
 
   return (
     <div className="setting-item">
@@ -47,18 +56,12 @@ function MicrophoneSetting() {
                 }} />
               </div>
             )}
-            <select
-              value={microphone.deviceId}
-              onChange={(e) => updateSetting('microphone', { ...microphone, deviceId: e.target.value })}
-              style={{ marginLeft: '8px', padding: '4px 8px', fontSize: '12px', borderRadius: '4px' }}
-            >
-              <option value="">默认</option>
-              {audioDevices.map((device, index) => (
-                <option key={device.deviceId} value={device.deviceId}>
-                  {device.label || `麦克风 ${index + 1}`}
-                </option>
-              ))}
-            </select>
+            <Select
+              value={microphone.deviceId || ''}
+              onChange={(deviceId) => updateSetting('microphone', { ...microphone, deviceId })}
+              options={deviceOptions}
+              placeholder="选择设备"
+            />
           </>
         )}
       </div>

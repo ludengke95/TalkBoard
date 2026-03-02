@@ -438,6 +438,34 @@ function AppWithSettings() {
     document.documentElement.setAttribute('data-theme', theme);
   }, [theme]);
 
+  // 页面打开时申请摄像头和麦克风权限
+  useEffect(() => {
+    const initDevices = async () => {
+      try {
+        await enumerateDevices();
+
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const hasVideo = devices.some(d => d.kind === 'videoinput');
+        const hasAudio = devices.some(d => d.kind === 'audioinput');
+
+        if (hasVideo || hasAudio) {
+          try {
+            await navigator.mediaDevices.getUserMedia({
+              video: hasVideo,
+              audio: hasAudio
+            });
+            await enumerateDevices();
+          } catch (e) {
+            console.error('申请权限失败:', e);
+          }
+        }
+      } catch (err) {
+        console.warn("获取设备列表失败:", err.message);
+      }
+    };
+    initDevices();
+  }, [enumerateDevices]);
+
   // 监听 Excalidraw 主题变化 - 通过 DOM 检测
   useEffect(() => {
     const checkExcalidrawTheme = () => {

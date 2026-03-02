@@ -466,43 +466,6 @@ function AppWithSettings() {
     initDevices();
   }, [enumerateDevices]);
 
-  // 监听 Excalidraw 主题变化 - 通过 DOM 检测
-  useEffect(() => {
-    const checkExcalidrawTheme = () => {
-      const excalidrawEl = document.querySelector('.excalidraw');
-      if (excalidrawEl) {
-        const isDark = excalidrawEl.classList.contains('theme--dark');
-        const currentTheme = isDark ? 'dark' : 'light';
-        if (currentTheme !== theme) {
-          updateSetting('theme', currentTheme);
-        }
-      }
-    };
-
-    // 初始检查
-    checkExcalidrawTheme();
-
-    // 使用 MutationObserver 监听 DOM 变化
-    const observer = new MutationObserver(checkExcalidrawTheme);
-    
-    const intervalId = setInterval(() => {
-      const excalidrawEl = document.querySelector('.excalidraw');
-      if (excalidrawEl && !observer.observe.called) {
-        observer.observe(excalidrawEl, { 
-          attributes: true, 
-          attributeFilter: ['class'] 
-        });
-        observer.observe.called = true;
-      }
-      checkExcalidrawTheme();
-    }, 500);
-
-    return () => {
-      clearInterval(intervalId);
-      observer.disconnect();
-    };
-  }, [theme, updateSetting]);
-
   const handleRecordClick = useCallback(() => {
     if (recordingStep === "idle") {
       handleStartSelect();
@@ -593,6 +556,12 @@ function AppWithSettings() {
         <Excalidraw
           excalidrawAPI={(api) => {
             excalidrawRef.current = api;
+          }}
+          theme={theme}
+          onChange={(elements, appState) => {
+            if (appState.theme && appState.theme !== theme) {
+              updateSetting('theme', appState.theme);
+            }
           }}
           langCode="zh-CN"
           UIOptions={{

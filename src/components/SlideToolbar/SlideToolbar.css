@@ -1,0 +1,186 @@
+.slide-toolbar {
+  position: fixed;
+  top: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: var(--bg-secondary, #fff);
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.slide-toolbar.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.slide-toolbar.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.slide-mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: transparent;
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-primary, #333);
+  transition: all 0.2s ease;
+}
+
+.slide-mode-btn:hover {
+  background: var(--hover-bg, #f5f5f5);
+}
+
+.slide-mode-btn.active {
+  background: #4f46e5;
+  border-color: #4f46e5;
+  color: #fff;
+}
+
+.slide-mode-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.slide-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border-color, #ddd);
+}
+
+.slide-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 10px;
+  background: transparent;
+  border: 1px solid var(--border-color, #ddd);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-primary, #333);
+  transition: all 0.2s ease;
+}
+
+.slide-btn:hover:not(:disabled) {
+  background: var(--hover-bg, #f5f5f5);
+}
+
+.slide-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.slide-btn.add-btn:hover:not(:disabled) {
+  background: #10b981;
+  border-color: #10b981;
+  color: #fff;
+}
+
+.slide-btn.delete-btn:hover:not(:disabled) {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: #fff;
+}
+
+.slide-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.slide-page-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.page-number {
+  font-size: 13px;
+  color: var(--text-primary, #333);
+  min-width: 50px;
+  text-align: center;
+}
+
+.nav-btn {
+  padding: 6px 8px;
+}
+
+.nav-btn:disabled {
+  opacity: 0.3;
+}
+
+/* 删除确认对话框 */
+.delete-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.delete-confirm-dialog {
+  background: var(--bg-secondary, #fff);
+  padding: 20px 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.delete-confirm-dialog p {
+  margin: 0 0 16px;
+  font-size: 15px;
+  color: var(--text-primary, #333);
+}
+
+.delete-confirm-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.confirm-cancel,
+.confirm-delete {
+  padding: 8px 20px;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.confirm-cancel {
+  background: transparent;
+  border: 1px solid var(--border-color, #ddd);
+  color: var(--text-primary, #333);
+}
+
+.confirm-cancel:hover {
+  background: var(--hover-bg, #f5f5f5);
+}
+
+.confirm-delete {
+  background: #ef4444;
+  border: none;
+  color: #fff;
+}
+
+.confirm-delete:hover {
+  background: #dc2626;
+}

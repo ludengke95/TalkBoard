@@ -19,6 +19,7 @@ import Toolbar from "./components/Toolbar/Toolbar";
 import Teleprompter from "./components/Teleprompter/Teleprompter";
 import SelectionBox from "./components/SelectionBox/SelectionBox";
 import CursorIndicator from "./components/CursorIndicator/CursorIndicator";
+import SlideToolbar from "./components/SlideToolbar/SlideToolbar";
 import { useMediaDevices } from "./hooks/useMediaDevices";
 import CameraPreview from "./components/CameraPreview/CameraPreview";
 import "./App.css";
@@ -37,6 +38,11 @@ function AppWithSettings() {
   const [showSettings, setShowSettings] = useState(false);
   const [teleprompterContent, setTeleprompterContent] = useState("");
   const [teleprompterVisible, setTeleprompterVisible] = useState(false);
+
+  // 演讲页状态
+  const [slides, setSlides] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [isSlideMode, setIsSlideMode] = useState(false);
 
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
@@ -143,8 +149,228 @@ function AppWithSettings() {
     setSelectionBox({ x, y, width, height });
   }, [aspectRatio]);
 
+  // 计算演讲页尺寸
+  const calculateSlideSize = useCallback(() => {
+    const ratio = (() => {
+      if (aspectRatio && aspectRatio.includes(":")) {
+        const [w, h] = aspectRatio.split(":").map(Number);
+        if (w && h) return w / h;
+      }
+      return 16 / 9;
+    })();
+
+    const slideWidth = window.innerWidth * 0.6;
+    const slideHeight = slideWidth / ratio;
+    return { width: slideWidth, height: slideHeight };
+  }, [aspectRatio]);
+
+  // 生成随机 ID
+  const generateId = () => {
+    return Math.random().toString(36).substring(2, 15) + 
+           Math.random().toString(36).substring(2, 15);
+  };
+
+  // 创建演讲页 Frame 元素
+  const createSlideElement = useCallback((slideInfo) => {
+    const { width, height } = calculateSlideSize();
+    return {
+      type: "frame",
+      id: slideInfo.frameId,
+      x: slideInfo.x,
+      y: slideInfo.y,
+      width: width,
+      height: height,
+      name: slideInfo.name,
+      children: [],
+      fillStyle: "transparent",
+      strokeColor: "#000",
+      strokeWidth: 1,
+      strokeStyle: "solid",
+      roughness: 0,
+      opacity: 100,
+      groupIds: [],
+      frameRendering: {
+        enabled: true,
+        outline: true,
+        clip: true,
+      },
+      isDeleted: false,
+      boundElements: [],
+      updated: Date.now(),
+      version: 1,
+      versionNonce: Math.floor(Math.random() * 1000000),
+      seed: Math.floor(Math.random() * 1000000),
+      angle: 0,
+    };
+  }, [calculateSlideSize]);
+
+  // 添加演讲页
+  const handleAddSlide = useCallback(() => {
+    if (!excalidrawRef.current) return;
+
+    const { width, height } = calculateSlideSize();
+    const gap = 50;
+    
+    let newX = 100;
+    if (slides.length > 0) {
+      const lastSlide = slides[slides.length - 1];
+      newX = lastSlide.x + lastSlide.width + gap;
+    }
+
+    const newSlide = {
+      id: generateId(),
+      frameId: generateId(),
+      name: `演讲页 ${slides.length + 1}`,
+      x: newX,
+      y: 100,
+      width: width,
+      height: height,
+    };
+
+    const frameElement = createSlideElement(newSlide);
+    
+    // 更新 Excalidraw 画布
+    excalidrawRef.current.updateScene({
+      elements: [frameElement],
+    });
+
+    setSlides(prev => [...prev, newSlide]);
+    setCurrentPage(slides.length);
+  }, [slides, calculateSlideSize, createSlideElement]);
+
+  // 删除演讲页
+  const handleDeleteSlide = useCallback(() => {
+    if (!excalidrawRef.current || slides.length <= 0) return;
+
+    const slideToDelete = slides[currentPage];
+    if (!slideToDelete) return;
+
+    // 从 Excalidraw 中删除 frame 元素
+    const elements = excalidrawRef.current.getSceneElements();
+    const updatedElements = elements.map(el => {
+      if (el.id === slideToDelete.frameId) {
+        return { ...el, isDeleted: true };
+      }
+      return el;
+    });
+    excalidrawRef.current.updateScene({ elements: updatedElements });
+
+    // 更新演讲页数组
+    const newSlides = slides.filter((_, idx) => idx !== currentPage);
+    setSlides(newSlides);
+
+    // 调整当前页码
+    if (currentPage >= newSlides.length) {
+      setCurrentPage(Math.max(0, newSlides.length - 1));
+    }
+
+    // 如果没有演讲页了，创建一个
+    if (newSlides.length === 0) {
+      setTimeout(() => handleAddSlide(), 0);
+    }
+  }, [slides, currentPage, handleAddSlide]);
+
+  // 切换演讲模式
+  const handleToggleSlideMode = useCallback(() => {
+    if (!isSlideMode) {
+      // 进入演讲模式，如果没有演讲页则创建一个
+      if (slides.length === 0) {
+        handleAddSlide();
+      }
+    }
+    setIsSlideMode(!isSlideMode);
+  }, [isSlideMode, slides.length, handleAddSlide]);
+
+  // 翻页到指定页
+  const scrollToPage = useCallback((pageIndex) => {
+    if (!excalidrawRef.current || pageIndex < 0 || pageIndex >= slides.length) return;
+
+    const slide = slides[pageIndex];
+    const elements = excalidrawRef.current.getSceneElements();
+    const frameElement = elements.find(el => el.id === slide.frameId);
+
+    if (frameElement) {
+      excalidrawRef.current.scrollToContent([frameElement], { fitToContent: false });
+    }
+
+    setCurrentPage(pageIndex);
+
+    // 录制过程中翻页，自动更新录制区域位置
+    if (selectionBox?.locked) {
+      setSelectionBox({
+        x: slide.x,
+        y: slide.y,
+        width: slide.width,
+        height: slide.height,
+        locked: true,
+      });
+    }
+  }, [slides, selectionBox]);
+
+  // 上一页
+  const handlePrevPage = useCallback(() => {
+    if (currentPage > 0) {
+      scrollToPage(currentPage - 1);
+    }
+  }, [currentPage, scrollToPage]);
+
+  // 下一页
+  const handleNextPage = useCallback(() => {
+    if (currentPage < slides.length - 1) {
+      scrollToPage(currentPage + 1);
+    }
+  }, [currentPage, slides.length, scrollToPage]);
+
+  // 键盘快捷键处理
+  useEffect(() => {
+    if (!isSlideMode || recordingStep === "recording") return;
+
+    const handleKeyDown = (e) => {
+      // 忽略输入框中的快捷键
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+
+      switch (e.key) {
+        case "ArrowRight":
+        case "ArrowDown":
+        case "n":
+        case "N":
+          e.preventDefault();
+          handleNextPage();
+          break;
+        case "ArrowLeft":
+        case "ArrowUp":
+        case "p":
+        case "P":
+          e.preventDefault();
+          handlePrevPage();
+          break;
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isSlideMode, recordingStep, handleNextPage, handlePrevPage]);
+
   const handleStartSelect = useCallback(async () => {
-    initSelectionBox();
+    // 演讲模式下，自动定位到第一个演讲页
+    if (isSlideMode && slides.length > 0) {
+      const firstSlide = slides[0];
+      // 将 selectionBox 定位到第一个演讲页的位置
+      setSelectionBox({
+        x: firstSlide.x,
+        y: firstSlide.y,
+        width: firstSlide.width,
+        height: firstSlide.height,
+        locked: true, // 锁定录制区域
+      });
+      // 滚动到第一个演讲页
+      scrollToPage(0);
+    } else {
+      initSelectionBox();
+    }
+    
     // 如果启用了摄像头，在选择区域时就开始预览
     if (camera.enabled) {
       const stream = await startVideo(camera.deviceId);
@@ -153,7 +379,7 @@ function AppWithSettings() {
       }
     }
     setRecordingStep("selecting");
-  }, [initSelectionBox, camera, startVideo]);
+  }, [initSelectionBox, camera, startVideo, isSlideMode, slides, scrollToPage]);
 
   const handleCancelSelect = useCallback(() => {
     setSelectionBox(null);
@@ -163,7 +389,12 @@ function AppWithSettings() {
       cameraStreamRef.current.getTracks().forEach((track) => track.stop());
       cameraStreamRef.current = null;
     }
-  }, []);
+    // 重置演讲页状态
+    if (isSlideMode && slides.length > 0) {
+      setCurrentPage(0);
+      scrollToPage(0);
+    }
+  }, [isSlideMode, slides, scrollToPage]);
 
   const handleBoxChange = useCallback((newBox) => {
     setSelectionBox(newBox);
@@ -249,6 +480,10 @@ function AppWithSettings() {
       const srcW = selectionBox.width * scaleX;
       const srcH = selectionBox.height * scaleY;
 
+      // 直接使用 canvas 的实际像素尺寸
+      const dstW = excalidrawCanvas.width;
+      const dstH = excalidrawCanvas.height;
+
       // 在边距位置绘制录制内容
       ctx.drawImage(
         excalidrawCanvas,
@@ -258,8 +493,8 @@ function AppWithSettings() {
         srcH,
         margin,
         margin,
-        selectionBox.width,
-        selectionBox.height,
+        dstW,
+        dstH,
       );
 
       // 绘制摄像头画面
@@ -509,6 +744,18 @@ function AppWithSettings() {
         onRecordClick={handleRecordClick}
         recordingStep={recordingStep}
         hasTeleprompterContent={teleprompterContent.trim().length > 0}
+      />
+
+      <SlideToolbar
+        isSlideMode={isSlideMode}
+        onToggleSlideMode={handleToggleSlideMode}
+        slides={slides}
+        currentPage={currentPage}
+        onAddSlide={handleAddSlide}
+        onDeleteSlide={handleDeleteSlide}
+        onPrevPage={handlePrevPage}
+        onNextPage={handleNextPage}
+        disabled={recordingStep === "recording"}
       />
 
       {showSettings && <SettingsModal theme={theme} onClose={() => setShowSettings(false)} />}

@@ -15,6 +15,8 @@ function SelectionBox({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const [initialBox, setInitialBox] = useState({ x: 0, y: 0, width: 0, height: 0 })
 
+  const isBoxLocked = box?.locked || false
+
   // 计算当前宽高比
   const getRatio = () => {
     if (aspectRatio && aspectRatio.includes(':')) {
@@ -27,7 +29,7 @@ function SelectionBox({
   const ratio = getRatio()
 
   const handleMouseDown = useCallback((e) => {
-    if (!box) return
+    if (!box || isBoxLocked) return
     
     const mouseX = e.clientX
     const mouseY = e.clientY
@@ -133,7 +135,7 @@ function SelectionBox({
   const isSelecting = recordingStep === 'selecting'
   const isReady = recordingStep === 'ready'
   const isRecording = recordingStep === 'recording'
-  const isLocked = isReady || isRecording
+  const isLocked = isReady || isRecording || isBoxLocked
 
   return (
     <div className={`selection-overlay ${isSelecting ? 'selecting' : ''} ${isLocked ? 'locked' : ''}`}>
@@ -151,8 +153,12 @@ function SelectionBox({
         {(recordingStep === 'ready' || isRecording) && (
           <div className="rec-indicator">REC</div>
         )}
+
+        {isBoxLocked && isSelecting && (
+          <div className="locked-indicator">已锁定</div>
+        )}
         
-        {!isRecording && isSelecting && (
+        {!isRecording && isSelecting && !isBoxLocked && (
           <>
             <div className="selection-handle nw" />
             <div className="selection-handle ne" />

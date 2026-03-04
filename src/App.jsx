@@ -3,7 +3,10 @@
  * 基于 Excalidraw 的带提词器和屏幕录制功能的白板应用
  */
 import { useRef, useState, useCallback, useEffect } from "react";
-import { Excalidraw } from "@excalidraw/excalidraw";
+import {
+  Excalidraw,
+  convertToExcalidrawElements,
+} from "@excalidraw/excalidraw";
 import {
   Input,
   Output,
@@ -26,7 +29,8 @@ import "./App.css";
 
 function AppWithSettings() {
   const { settings, updateSetting } = useSettings();
-  const { mouseEffect, aspectRatio, cornerRadius, camera, microphone, theme } = settings;
+  const { mouseEffect, aspectRatio, cornerRadius, camera, microphone, theme } =
+    settings;
   const { enumerateDevices, startVideo, stopVideo } = useMediaDevices();
 
   const excalidrawRef = useRef(null);
@@ -42,7 +46,6 @@ function AppWithSettings() {
   // 演讲页状态
   const [slides, setSlides] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
-  const [isSlideMode, setIsSlideMode] = useState(false);
 
   const mediaRecorderRef = useRef(null);
   const chunksRef = useRef([]);
@@ -166,52 +169,44 @@ function AppWithSettings() {
 
   // 生成随机 ID
   const generateId = () => {
-    return Math.random().toString(36).substring(2, 15) + 
-           Math.random().toString(36).substring(2, 15);
+    return (
+      Math.random().toString(36).substring(2, 15) +
+      Math.random().toString(36).substring(2, 15)
+    );
   };
 
   // 创建演讲页 Frame 元素
-  const createSlideElement = useCallback((slideInfo) => {
-    const { width, height } = calculateSlideSize();
-    return {
-      type: "frame",
-      id: slideInfo.frameId,
-      x: slideInfo.x,
-      y: slideInfo.y,
-      width: width,
-      height: height,
-      name: slideInfo.name,
-      children: [],
-      fillStyle: "transparent",
-      strokeColor: "#000",
-      strokeWidth: 1,
-      strokeStyle: "solid",
-      roughness: 0,
-      opacity: 100,
-      groupIds: [],
-      frameRendering: {
-        enabled: true,
-        outline: true,
-        clip: true,
-      },
-      isDeleted: false,
-      boundElements: [],
-      updated: Date.now(),
-      version: 1,
-      versionNonce: Math.floor(Math.random() * 1000000),
-      seed: Math.floor(Math.random() * 1000000),
-      angle: 0,
-    };
-  }, [calculateSlideSize]);
+  const createSlideElement = useCallback(
+    (slideInfo) => {
+      const { width, height } = calculateSlideSize();
+      const frameData = {
+        type: "frame",
+        id: slideInfo.frameId,
+        width: slideInfo.width || width,
+        height: slideInfo.height || height,
+        name: slideInfo.name,
+        children: [],
+      };
+      const elements = convertToExcalidrawElements([frameData]);
+      // 转换后再手动设置位置
+      if (elements[0]) {
+        elements[0].x = slideInfo.x;
+        elements[0].y = slideInfo.y;
+      }
+      return elements[0];
+    },
+    [calculateSlideSize],
+  );
 
   // 添加演讲页
   const handleAddSlide = useCallback(() => {
     if (!excalidrawRef.current) return;
 
     const { width, height } = calculateSlideSize();
-    const gap = 50;
-    
+    const gap = 80;
+
     let newX = 100;
+    // 从 React 状态中获取最后一个演讲页的位置
     if (slides.length > 0) {
       const lastSlide = slides[slides.length - 1];
       newX = lastSlide.x + lastSlide.width + gap;
@@ -228,84 +223,161 @@ function AppWithSettings() {
     };
 
     const frameElement = createSlideElement(newSlide);
-    
-    // 更新 Excalidraw 画布
+
+    // 获取现有元素并追加新元素
+    const existingElements = excalidrawRef.current.getSceneElements();
     excalidrawRef.current.updateScene({
-      elements: [frameElement],
+      elements: [...existingElements, frameElement],
     });
 
-    setSlides(prev => [...prev, newSlide]);
-    setCurrentPage(slides.length);
+    setSlides((prev) => [...prev, newSlide]);
+    setCurrentPage((prev) => prev);
   }, [slides, calculateSlideSize, createSlideElement]);
 
   // 删除演讲页
-  const handleDeleteSlide = useCallback(() => {
-    if (!excalidrawRef.current || slides.length <= 0) return;
+  const handleDeleteSlide = useCallback(
+    (index) => {
+      if (!excalidrawRef.current) return;
 
-    const slideToDelete = slides[currentPage];
-    if (!slideToDelete) return;
+      // 使用传入的 index 或当前的 currentPage
+      const pageToDelete = index !== undefined ? index : 0;
 
-    // 从 Excalidraw 中删除 frame 元素
-    const elements = excalidrawRef.current.getSceneElements();
-    const updatedElements = elements.map(el => {
-      if (el.id === slideToDelete.frameId) {
-        return { ...el, isDeleted: true };
-      }
-      return el;
-    });
-    excalidrawRef.current.updateScene({ elements: updatedElements });
+      setSlides((prevSlides) => {
+        if (prevSlides.length <= 1) return prevSlides;
 
-    // 更新演讲页数组
-    const newSlides = slides.filter((_, idx) => idx !== currentPage);
-    setSlides(newSlides);
+        const slideToDelete = prevSlides[pageToDelete];
+        if (!slideToDelete) return prevSlides;
 
-    // 调整当前页码
-    if (currentPage >= newSlides.length) {
-      setCurrentPage(Math.max(0, newSlides.length - 1));
-    }
+        // 从 Excalidraw 中删除 frame 元素
+        const elements = excalidrawRef.current.getSceneElements();
+        const updatedElements = elements.map((el) => {
+          if (el.id === slideToDelete.frameId) {
+            return { ...el, isDeleted: true };
+          }
+          return el;
+        });
+        excalidrawRef.current.updateScene({ elements: updatedElements });
 
-    // 如果没有演讲页了，创建一个
-    if (newSlides.length === 0) {
-      setTimeout(() => handleAddSlide(), 0);
-    }
-  }, [slides, currentPage, handleAddSlide]);
+        // 更新演讲页数组
+        const newSlides = prevSlides.filter((_, idx) => idx !== pageToDelete);
 
-  // 切换演讲模式
-  const handleToggleSlideMode = useCallback(() => {
-    if (!isSlideMode) {
-      // 进入演讲模式，如果没有演讲页则创建一个
-      if (slides.length === 0) {
-        handleAddSlide();
-      }
-    }
-    setIsSlideMode(!isSlideMode);
-  }, [isSlideMode, slides.length, handleAddSlide]);
+        // 调整当前页码
+        if (pageToDelete >= newSlides.length) {
+          setCurrentPage(Math.max(0, newSlides.length - 1));
+        } else if (pageToDelete < currentPage) {
+          setCurrentPage((prev) => Math.max(0, prev - 1));
+        }
+
+        return newSlides;
+      });
+    },
+    [currentPage],
+  );
 
   // 翻页到指定页
-  const scrollToPage = useCallback((pageIndex) => {
-    if (!excalidrawRef.current || pageIndex < 0 || pageIndex >= slides.length) return;
+  const scrollToPage = useCallback(
+    (pageIndex) => {
+      if (!excalidrawRef.current || pageIndex < 0 || pageIndex >= slides.length)
+        return;
 
-    const slide = slides[pageIndex];
-    const elements = excalidrawRef.current.getSceneElements();
-    const frameElement = elements.find(el => el.id === slide.frameId);
+      const slide = slides[pageIndex];
+      
+      console.log('scrollToPage - slide:', JSON.stringify(slide));
+      
+      // 先设置当前页码
+      setCurrentPage(pageIndex);
 
-    if (frameElement) {
-      excalidrawRef.current.scrollToContent([frameElement], { fitToContent: false });
-    }
+      // 获取画布中的所有元素
+      const elements = excalidrawRef.current.getSceneElements();
+      const frameElements = elements.filter(el => el.type === 'frame');
+      console.log('scrollToPage - frame ids on canvas:', frameElements.map(el => el.id));
+      console.log('scrollToPage - looking for frameId:', slide.frameId);
+      const frameElement = elements.find((el) => el.id === slide.frameId);
+      
+      console.log('scrollToPage - frameElement:', frameElement ? 'found' : 'NOT FOUND');
+      console.log('scrollToPage - elements types:', elements.map(el => el.type));
 
-    setCurrentPage(pageIndex);
+      if (frameElement) {
+        // 如果找到了 frame 元素，使用 Excalidraw 的 scrollToContent API
+        excalidrawRef.current.scrollToContent([frameElement], {
+          fitToContent: false,
+        });
+        
+        // 额外设置缩放以确保完整显示
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const padding = 80;
+        const scaleX = (viewportWidth - padding * 2) / frameElement.width;
+        const scaleY = (viewportHeight - padding * 2) / frameElement.height;
+        const newZoom = Math.min(scaleX, scaleY, 1);
+        
+        console.log('scrollToPage - calculated zoom:', newZoom);
+        
+        if (!isNaN(newZoom) && newZoom > 0) {
+          excalidrawRef.current.updateScene({
+            appState: { zoom: newZoom },
+          });
+        }
+      } else {
+        // 如果找不到元素，滚动到存储的坐标位置
+        console.log('scrollToPage - sliding to stored position:', slide.x, slide.y);
+        
+        const defaultSize = calculateSlideSize();
+        const x = slide.x || 100;
+        const y = slide.y || 100;
+        const width = slide.width || defaultSize.width;
+        const height = slide.height || defaultSize.height;
+        
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const padding = 80;
+        const scaleX = (viewportWidth - padding * 2) / width;
+        const scaleY = (viewportHeight - padding * 2) / height;
+        const newZoom = Math.min(scaleX, scaleY, 1);
+        
+        const centerX = x + width / 2;
+        const centerY = y + height / 2;
+        const scrollX = viewportWidth / 2 - centerX * newZoom;
+        const scrollY = viewportHeight / 2 - centerY * newZoom;
+        
+        console.log('scrollToPage - fallback scroll:', scrollX, scrollY, 'zoom:', newZoom);
+        
+        excalidrawRef.current.updateScene({
+          appState: {
+            scrollX: isNaN(scrollX) ? 0 : scrollX,
+            scrollY: isNaN(scrollY) ? 0 : scrollY,
+            zoom: isNaN(newZoom) ? 1 : newZoom,
+          },
+        });
+      }
 
-    // 录制过程中翻页，自动更新录制区域位置
-    if (selectionBox?.locked) {
-      setSelectionBox({
-        x: slide.x,
-        y: slide.y,
-        width: slide.width,
-        height: slide.height,
-        locked: true,
-      });
-    }
-  }, [slides, selectionBox]);
+      // 录制过程中翻页，自动更新录制区域位置
+      if (selectionBox?.locked) {
+        setSelectionBox({
+          x: slide.x,
+          y: slide.y,
+          width: slide.width,
+          height: slide.height,
+          locked: true,
+        });
+      }
+    },
+    [slides, selectionBox, calculateSlideSize],
+  );
+
+  // 选择演讲页 - 定位到画布对应位置
+  const handleSelectSlide = useCallback(
+    (index) => {
+      scrollToPage(index);
+    },
+    [scrollToPage],
+  );
+
+  // 重新排序演讲页
+  const handleReorderSlides = useCallback((newOrder) => {
+    setSlides(newOrder);
+    setCurrentPage(0);
+  }, []);
 
   // 上一页
   const handlePrevPage = useCallback(() => {
@@ -323,11 +395,12 @@ function AppWithSettings() {
 
   // 键盘快捷键处理
   useEffect(() => {
-    if (!isSlideMode || recordingStep === "recording") return;
+    if (recordingStep === "recording") return;
 
     const handleKeyDown = (e) => {
       // 忽略输入框中的快捷键
-      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA")
+        return;
 
       switch (e.key) {
         case "ArrowRight":
@@ -351,11 +424,11 @@ function AppWithSettings() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isSlideMode, recordingStep, handleNextPage, handlePrevPage]);
+  }, [recordingStep, handleNextPage, handlePrevPage]);
 
   const handleStartSelect = useCallback(async () => {
-    // 演讲模式下，自动定位到第一个演讲页
-    if (isSlideMode && slides.length > 0) {
+    // 如果有演讲页，自动定位到第一个演讲页
+    if (slides.length > 0) {
       const firstSlide = slides[0];
       // 将 selectionBox 定位到第一个演讲页的位置
       setSelectionBox({
@@ -370,7 +443,7 @@ function AppWithSettings() {
     } else {
       initSelectionBox();
     }
-    
+
     // 如果启用了摄像头，在选择区域时就开始预览
     if (camera.enabled) {
       const stream = await startVideo(camera.deviceId);
@@ -379,7 +452,7 @@ function AppWithSettings() {
       }
     }
     setRecordingStep("selecting");
-  }, [initSelectionBox, camera, startVideo, isSlideMode, slides, scrollToPage]);
+  }, [initSelectionBox, camera, startVideo, slides, scrollToPage]);
 
   const handleCancelSelect = useCallback(() => {
     setSelectionBox(null);
@@ -390,11 +463,11 @@ function AppWithSettings() {
       cameraStreamRef.current = null;
     }
     // 重置演讲页状态
-    if (isSlideMode && slides.length > 0) {
+    if (slides.length > 0) {
       setCurrentPage(0);
       scrollToPage(0);
     }
-  }, [isSlideMode, slides, scrollToPage]);
+  }, [slides, scrollToPage]);
 
   const handleBoxChange = useCallback((newBox) => {
     setSelectionBox(newBox);
@@ -534,15 +607,17 @@ function AppWithSettings() {
     if (microphone.enabled) {
       try {
         const audioStream = await navigator.mediaDevices.getUserMedia({
-          audio: microphone.deviceId ? { deviceId: { exact: microphone.deviceId } } : true
+          audio: microphone.deviceId
+            ? { deviceId: { exact: microphone.deviceId } }
+            : true,
         });
         audioStreamRef.current = audioStream;
         // 将音频轨道添加到视频流
-        audioStream.getAudioTracks().forEach(track => {
+        audioStream.getAudioTracks().forEach((track) => {
           stream.addTrack(track);
         });
       } catch (err) {
-        console.warn('获取麦克风失败:', err);
+        console.warn("获取麦克风失败:", err);
       }
     }
 
@@ -581,7 +656,10 @@ function AppWithSettings() {
         const webmBlob = new Blob(chunksRef.current, { type: "video/webm" });
 
         try {
-          const input = new Input({ source: new BlobSource(webmBlob), formats: [WEBM] });
+          const input = new Input({
+            source: new BlobSource(webmBlob),
+            formats: [WEBM],
+          });
           const output = new Output({
             format: new Mp4OutputFormat(),
             target: new BufferTarget(),
@@ -670,7 +748,7 @@ function AppWithSettings() {
 
   // 同步主题到 html 元素
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
+    document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
 
   // 页面打开时申请摄像头和麦克风权限
@@ -680,18 +758,18 @@ function AppWithSettings() {
         await enumerateDevices();
 
         const devices = await navigator.mediaDevices.enumerateDevices();
-        const hasVideo = devices.some(d => d.kind === 'videoinput');
-        const hasAudio = devices.some(d => d.kind === 'audioinput');
+        const hasVideo = devices.some((d) => d.kind === "videoinput");
+        const hasAudio = devices.some((d) => d.kind === "audioinput");
 
         if (hasVideo || hasAudio) {
           try {
             await navigator.mediaDevices.getUserMedia({
               video: hasVideo,
-              audio: hasAudio
+              audio: hasAudio,
             });
             await enumerateDevices();
           } catch (e) {
-            console.error('申请权限失败:', e);
+            console.error("申请权限失败:", e);
           }
         }
       } catch (err) {
@@ -747,18 +825,20 @@ function AppWithSettings() {
       />
 
       <SlideToolbar
-        isSlideMode={isSlideMode}
-        onToggleSlideMode={handleToggleSlideMode}
         slides={slides}
         currentPage={currentPage}
         onAddSlide={handleAddSlide}
         onDeleteSlide={handleDeleteSlide}
+        onSelectSlide={handleSelectSlide}
+        onReorderSlides={handleReorderSlides}
         onPrevPage={handlePrevPage}
         onNextPage={handleNextPage}
         disabled={recordingStep === "recording"}
       />
 
-      {showSettings && <SettingsModal theme={theme} onClose={() => setShowSettings(false)} />}
+      {showSettings && (
+        <SettingsModal theme={theme} onClose={() => setShowSettings(false)} />
+      )}
 
       <Teleprompter
         theme={theme}
@@ -807,14 +887,14 @@ function AppWithSettings() {
           theme={theme}
           onChange={(elements, appState) => {
             if (appState.theme && appState.theme !== theme) {
-              updateSetting('theme', appState.theme);
+              updateSetting("theme", appState.theme);
             }
           }}
           langCode="zh-CN"
           UIOptions={{
             canvasActions: {
-              toggleTheme: true
-            }
+              toggleTheme: true,
+            },
           }}
         />
       </main>

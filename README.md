@@ -86,3 +86,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 ---
 
 If you find this project helpful, please consider giving it a ⭐!
+
+## Star History
+
+[![Star History Chart](https://api.star-history.com/image?repos=ludengke95/TalkBoard&type=date&legend=top-left)](https://www.star-history.com/?repos=ludengke95%2FTalkBoard&type=date&legend=bottom-right)

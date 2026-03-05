@@ -82,3 +82,7 @@ MIT License - 详见 [LICENSE](LICENSE)。
 ---
 
 如果这个项目对你有帮助，请考虑给个 ⭐！
+
+## 星星历史
+
+[![Star History Chart](https://api.star-history.com/image?repos=ludengke95/TalkBoard&type=date&legend=top-left)](https://www.star-history.com/?repos=ludengke95%2FTalkBoard&type=date&legend=bottom-right)

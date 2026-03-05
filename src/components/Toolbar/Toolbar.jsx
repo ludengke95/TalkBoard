@@ -24,10 +24,10 @@ function Toolbar({
         }
         return parsed
       } catch {
-        return { x: 0.02, y: 0.02 }
+        return { x: 0.8, y: 0.02 }
       }
     }
-    return { x: 0.02, y: 0.02 }
+    return { x: 0.8, y: 0.02 }
   })
   
   const [pixelPosition, setPixelPosition] = useState({ 

@@ -1,5 +1,5 @@
-import { useState, useCallback, useRef } from 'react'
-import './SlideToolbar.css'
+import { useState, useCallback, useRef } from "react";
+import "./SlideToolbar.css";
 
 function SlideToolbar({
   slides,
@@ -8,16 +8,14 @@ function SlideToolbar({
   onDeleteSlide,
   onSelectSlide,
   onReorderSlides,
-  onPrevPage,
-  onNextPage,
-  disabled
+  readOnly,
 }) {
   const [draggedIndex, setDraggedIndex] = useState(null);
   const dragOverIndexRef = useRef(null);
 
   const handleDragStart = useCallback((e, index) => {
     setDraggedIndex(index);
-    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.effectAllowed = "move";
   }, []);
 
   const handleDragOver = useCallback((e, index) => {
@@ -26,34 +24,45 @@ function SlideToolbar({
   }, []);
 
   const handleDragEnd = useCallback(() => {
-    if (draggedIndex !== null && dragOverIndexRef.current !== null && draggedIndex !== dragOverIndexRef.current) {
+    if (
+      draggedIndex !== null &&
+      dragOverIndexRef.current !== null &&
+      draggedIndex !== dragOverIndexRef.current
+    ) {
       const newSlides = [...slides];
       const draggedItem = newSlides[draggedIndex];
       newSlides.splice(draggedIndex, 1);
-      newSlides.splice(draggedIndex < dragOverIndexRef.current ? dragOverIndexRef.current - 1 : dragOverIndexRef.current, 0, draggedItem);
+      newSlides.splice(
+        draggedIndex < dragOverIndexRef.current
+          ? dragOverIndexRef.current - 1
+          : dragOverIndexRef.current,
+        0,
+        draggedItem,
+      );
       onReorderSlides(newSlides);
     }
     setDraggedIndex(null);
     dragOverIndexRef.current = null;
   }, [draggedIndex, slides, onReorderSlides]);
 
-  const handleDelete = useCallback((e, index) => {
-    e.stopPropagation();
-    if (slides.length > 1) {
+  const handleDelete = useCallback(
+    (e, index) => {
+      e.stopPropagation();
       onDeleteSlide(index);
-    }
-  }, [slides.length, onDeleteSlide]);
+    },
+    [onDeleteSlide],
+  );
 
   return (
-    <div className={`slide-toolbar ${disabled ? 'disabled' : ''}`}>
+    <div className="slide-toolbar">
       <div className="slide-toolbar-header">演讲页</div>
-      
+
       <div className="slide-list">
         {slides.map((slide, index) => (
           <div
             key={slide.id}
-            className={`slide-item ${currentPage === index ? 'active' : ''} ${draggedIndex === index ? 'dragging' : ''}`}
-            draggable={!disabled}
+            className={`slide-item ${currentPage === index ? "active" : ""} ${draggedIndex === index ? "dragging" : ""}`}
+            draggable={!readOnly}
             onDragStart={(e) => handleDragStart(e, index)}
             onDragOver={(e) => handleDragOver(e, index)}
             onDragEnd={handleDragEnd}
@@ -62,15 +71,25 @@ function SlideToolbar({
             <div className="slide-thumbnail">
               <span className="slide-number">{index + 1}</span>
             </div>
-            {slides.length > 1 && (
+            {slides.length > 0 && (
               <button
                 className="slide-delete-btn"
                 onClick={(e) => handleDelete(e, index)}
-                disabled={disabled}
+                disabled={readOnly}
                 title="删除演讲页"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             )}
@@ -81,15 +100,25 @@ function SlideToolbar({
       <button
         className="slide-add-btn"
         onClick={onAddSlide}
-        disabled={disabled}
+        disabled={readOnly}
         title="添加演讲页"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          strokeWidth={2}
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M12 4.5v15m7.5-7.5h-15"
+          />
         </svg>
       </button>
     </div>
-  )
+  );
 }
 
-export default SlideToolbar
+export default SlideToolbar;

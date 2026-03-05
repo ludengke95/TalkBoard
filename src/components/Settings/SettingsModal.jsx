@@ -6,12 +6,10 @@ import { useEffect } from "react";
 import { useSettings } from "../../contexts/SettingsContext";
 import { useMediaDevices } from "../../hooks/useMediaDevices";
 import AspectRatioSetting from "./AspectRatioSetting";
-import BackgroundSetting from "./BackgroundSetting";
 import CornerRadiusSetting from "./CornerRadiusSetting";
 import CameraSetting from "./CameraSetting";
 import MicrophoneSetting from "./MicrophoneSetting";
 import MouseEffectSetting from "./MouseEffectSetting";
-import MarginSetting from "./MarginSetting";
 import "./SettingsModal.css";
 
 function SettingsModal({ onClose }) {
@@ -70,25 +68,7 @@ function SettingsModal({ onClose }) {
                 }}
               >
                 <div
-                  className="preview-background"
-                  style={{
-                    backgroundColor:
-                      settings.background.type === "color"
-                        ? settings.background.value
-                        : "transparent",
-                    backgroundImage:
-                      settings.background.type === "image"
-                        ? `url(${settings.background.value})`
-                        : "none",
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                  }}
-                />
-                <div
                   className="preview-recording-area"
-                  style={{
-                    padding: settings.margin ? `${settings.margin}px` : 0,
-                  }}
                 >
                   <div
                     className="preview-recording-content"
@@ -120,12 +100,10 @@ function SettingsModal({ onClose }) {
           {/* 配置项列表 */}
           <div className="settings-list">
             <AspectRatioSetting />
-            <BackgroundSetting />
             <CornerRadiusSetting />
             <CameraSetting />
             <MicrophoneSetting />
             <MouseEffectSetting />
-            <MarginSetting />
           </div>
 
           {/* 底部操作区 */}

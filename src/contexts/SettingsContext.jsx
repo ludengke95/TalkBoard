@@ -13,14 +13,9 @@ const defaultSettings = {
   theme: 'light',
   // 1. 画面比例
   aspectRatio: '16:9',
-  // 2. 背景设置
-  background: {
-    type: 'color', // 'color' | 'image'
-    value: '#f5f5f5' // 颜色值或图片 URL
-  },
-  // 3. 圆角半径
+  // 2. 圆角半径
   cornerRadius: 12,
-  // 4. 摄像头设置
+  // 3. 摄像头设置
   camera: {
     enabled: false,
     shape: 'circle', // 'circle' | 'square'
@@ -29,18 +24,16 @@ const defaultSettings = {
     offsetX: 20, // 距离右边界的距离
     offsetY: 20  // 距离下边界的距离
   },
-  // 5. 麦克风设置
+  // 4. 麦克风设置
   microphone: {
     enabled: false,
     deviceId: '' // 选中的麦克风设备 ID
   },
-  // 6. 鼠标效果设置
+  // 5. 鼠标效果设置
   mouseEffect: {
     enabled: true,
     color: '#ffeb3b' // 鼠标高亮颜色
-  },
-  // 7. 录制区域边距
-  margin: 20
+  }
 }
 
 // 从 localStorage 加载设置

@@ -606,9 +606,13 @@ function AppWithSettings() {
       }
     }
 
+    const isApple = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
+    const mimeType = isApple
+      ? "video/webm;codecs=vp8"
+      : "video/webm;codecs=vp9";
+
     const mediaRecorder = new MediaRecorder(stream, {
-      mimeType: "video/webm;codecs=vp9",
-      // bitsPerSecond: 5_000_000,
+      mimeType,
       videoBitsPerSecond: 10_000_000,
     });
 
@@ -878,6 +882,7 @@ function AppWithSettings() {
             excalidrawRef.current = api;
           }}
           theme={theme}
+          viewBackgroundColor={theme === "dark" ? "#1a1a1a" : "#ffffff"}
           onChange={(elements, appState) => {
             if (appState.theme && appState.theme !== theme) {
               updateSetting("theme", appState.theme);

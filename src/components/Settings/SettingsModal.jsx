@@ -6,7 +6,6 @@ import { useEffect } from "react";
 import { useSettings } from "../../contexts/SettingsContext";
 import { useMediaDevices } from "../../hooks/useMediaDevices";
 import AspectRatioSetting from "./AspectRatioSetting";
-import CornerRadiusSetting from "./CornerRadiusSetting";
 import CameraSetting from "./CameraSetting";
 import MicrophoneSetting from "./MicrophoneSetting";
 import MouseEffectSetting from "./MouseEffectSetting";
@@ -72,11 +71,6 @@ function SettingsModal({ onClose }) {
                 >
                   <div
                     className="preview-recording-content"
-                    style={{
-                      borderRadius: settings.cornerRadius
-                        ? `${settings.cornerRadius}px`
-                        : 0,
-                    }}
                   >
                     <div className="preview-whiteboard">
                       <span>预览</span>
@@ -100,7 +94,6 @@ function SettingsModal({ onClose }) {
           {/* 配置项列表 */}
           <div className="settings-list">
             <AspectRatioSetting />
-            <CornerRadiusSetting />
             <CameraSetting />
             <MicrophoneSetting />
             <MouseEffectSetting />

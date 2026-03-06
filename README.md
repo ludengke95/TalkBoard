@@ -1,4 +1,4 @@
-# TalkBoard
+# TalkBoard 
 
 A web-based whiteboard application with teleprompter and screen recording capabilities, built with Excalidraw.
 

@@ -236,8 +236,11 @@ function AppWithSettings() {
             }
 
             // 录制时锁定视图（翻页过程中不锁定）
+            // selecting/ready/recording 状态都需要锁定视图
             if (
-              recordingStep === "recording" &&
+              (recordingStep === "selecting" ||
+                recordingStep === "ready" ||
+                recordingStep === "recording") &&
               lockedViewState &&
               !isPageTurning
             ) {

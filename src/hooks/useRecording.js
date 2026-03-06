@@ -197,6 +197,13 @@ export const useRecording = ({
             height: screenHeight,
             locked: true, // 锁定录制区域
           })
+
+          // 保存视图状态（演讲模式下，滚动完成后保存）
+          lockedViewStateRef.current = {
+            scrollX: appState.scrollX,
+            scrollY: appState.scrollY,
+            zoom: appState.zoom.value,
+          }
         } else {
           // 如果画布上找不到，使用 slides 状态中的位置
           setSelectionBox({
@@ -209,6 +216,15 @@ export const useRecording = ({
         }
       }, 500)
     } else {
+      // 非演讲模式，直接保存当前视图状态
+      if (excalidrawRef.current) {
+        const appState = excalidrawRef.current.getAppState()
+        lockedViewStateRef.current = {
+          scrollX: appState.scrollX,
+          scrollY: appState.scrollY,
+          zoom: appState.zoom.value,
+        }
+      }
       initSelectionBox()
     }
 

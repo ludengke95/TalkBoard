@@ -56,6 +56,34 @@ function CameraSetting() {
           </>
         )}
       </div>
+      {camera.enabled && (
+        <div className="setting-item-control" style={{ marginTop: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', width: '32px' }}>{t('camera.size')}</span>
+            <input
+              type="range"
+              min="5"
+              max="50"
+              value={camera.size}
+              onChange={(e) => updateSetting('camera', { ...camera, size: Number(e.target.value) })}
+              style={{ width: '80px' }}
+            />
+            <span style={{ fontSize: '12px', width: '32px' }}>{camera.size}%</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '16px' }}>
+            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', width: '32px' }}>{t('camera.offset')}</span>
+            <input
+              type="range"
+              min="0"
+              max="20"
+              value={camera.offset}
+              onChange={(e) => updateSetting('camera', { ...camera, offset: Number(e.target.value) })}
+              style={{ width: '60px' }}
+            />
+            <span style={{ fontSize: '12px', width: '28px' }}>{camera.offset}%</span>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

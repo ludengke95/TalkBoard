@@ -46,7 +46,9 @@
     "shapeCircle": "Circle",
     "shapeSquare": "Square",
     "defaultDevice": "Default",
-    "selectDevice": "Select Device"
+    "selectDevice": "Select Device",
+    "size": "Size",
+    "offset": "Offset"
   },
   "microphone": {
     "label": "Microphone",

@@ -9,16 +9,14 @@ function CameraPreview({
   enabled,
   stream,
   shape = "circle",
-  size = 120,
+  size = 15,
   position = "bottom-right",
-  offsetX = 20,
-  offsetY = 20,
+  offset = 3,
   selectionBox = null,
 }) {
   const videoRef = useRef(null);
   const containerRef = useRef(null);
 
-  // 当视频流变化时，设置到 video 元素
   useEffect(() => {
     if (stream && videoRef.current) {
       videoRef.current.srcObject = stream;
@@ -28,40 +26,41 @@ function CameraPreview({
     }
   }, [stream]);
 
-  // 如果未启用、没有视频流或没有选择区域，不显示
   if (!enabled || !stream || !selectionBox) {
     return null;
   }
 
   const { x, y, width, height } = selectionBox;
 
-  // 计算摄像头位置（相对于录制区域）
+  const cameraSize = (size / 100) * height;
+  const cameraOffset = (offset / 100) * Math.min(width, height);
+
   let left, top;
   switch (position) {
     case "top-left":
-      left = x + offsetX;
-      top = y + offsetY;
+      left = x + cameraOffset;
+      top = y + cameraOffset;
       break;
     case "top-right":
-      left = x + width - size - offsetX;
-      top = y + offsetY;
+      left = x + width - cameraSize - cameraOffset;
+      top = y + cameraOffset;
       break;
     case "bottom-left":
-      left = x + offsetX;
-      top = y + height - size - offsetY;
+      left = x + cameraOffset;
+      top = y + height - cameraSize - cameraOffset;
       break;
     case "bottom-right":
     default:
-      left = x + width - size - offsetX;
-      top = y + height - size - offsetY;
+      left = x + width - cameraSize - cameraOffset;
+      top = y + height - cameraSize - cameraOffset;
       break;
   }
 
   const containerStyle = {
     left: `${left}px`,
     top: `${top}px`,
-    width: `${size}px`,
-    height: `${size}px`,
+    width: `${cameraSize}px`,
+    height: `${cameraSize}px`,
     borderRadius: shape === "circle" ? "50%" : "8px",
   };
 

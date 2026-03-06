@@ -86,7 +86,11 @@ function SettingsModal({ onClose }) {
                         />
                       )}
                     </div>
-                    <CameraPreview videoStream={videoStream} />
+                    <CameraPreview 
+                      videoStream={videoStream} 
+                      previewWidth={previewWidth}
+                      previewHeight={previewHeight}
+                    />
                   </div>
                 </div>
               </div>
@@ -119,26 +123,32 @@ function SettingsModal({ onClose }) {
   );
 }
 
-function CameraPreview({ videoStream }) {
+function CameraPreview({ videoStream, previewWidth, previewHeight }) {
   const { settings } = useSettings();
   const { camera } = settings;
 
   if (!camera.enabled) return null;
 
+  const size = (camera.size / 100) * previewHeight;
+  const offset = (camera.offset / 100) * Math.min(previewWidth, previewHeight);
+
   const positionStyle = {
-    "bottom-right": { right: 8, bottom: 8 },
-    "bottom-left": { left: 8, bottom: 8 },
-    "top-right": { right: 8, top: 8 },
-    "top-left": { left: 8, top: 8 },
-  }[camera.position] || { right: 8, bottom: 8 };
+    "bottom-right": { right: offset, bottom: offset },
+    "bottom-left": { left: offset, bottom: offset },
+    "top-right": { right: offset, top: offset },
+    "top-left": { left: offset, top: offset },
+  }[camera.position] || { right: offset, bottom: offset };
+
+  const width = size;
+  const height = camera.shape === "circle" ? size : size * 0.75;
 
   return (
     <div
       className={`camera-overlay ${camera.shape}`}
       style={{
         ...positionStyle,
-        width: camera.size * 0.5,
-        height: camera.shape === "circle" ? camera.size * 0.5 : camera.size * 0.375,
+        width,
+        height,
       }}
     >
       {videoStream && (

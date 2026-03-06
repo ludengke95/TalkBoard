@@ -21,11 +21,10 @@ const defaultSettings = {
   // 3. 摄像头设置
   camera: {
     enabled: false,
-    shape: "circle", // 'circle' | 'square'
-    size: 360, // 摄像头画面大小
+    shape: "circle",
+    size: 15,
     position: "bottom-right",
-    offsetX: 80, // 距离右边界的距离
-    offsetY: 80, // 距离下边界的距离
+    offset: 3,
   },
   // 4. 麦克风设置
   microphone: {

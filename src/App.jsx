@@ -218,8 +218,7 @@ function AppWithSettings() {
           shape={camera.shape}
           size={camera.size}
           position={camera.position}
-          offsetX={camera.offsetX}
-          offsetY={camera.offsetY}
+          offset={camera.offset}
           selectionBox={selectionBox}
         />
       )}

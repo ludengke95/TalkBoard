@@ -46,7 +46,9 @@
     "shapeCircle": "圆形",
     "shapeSquare": "方形",
     "defaultDevice": "默认",
-    "selectDevice": "选择设备"
+    "selectDevice": "选择设备",
+    "size": "大小",
+    "offset": "边距"
   },
   "microphone": {
     "label": "麦克风",

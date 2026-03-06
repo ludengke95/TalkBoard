@@ -63,30 +63,31 @@ export const useRecording = ({
       if (!videoRef.current || videoRef.current.readyState < 2) return
 
       const video = videoRef.current
-      const { size, shape, position } = camera
+      const { size, shape, position, offset } = camera
+
+      const cameraSize = (size / 100) * canvasHeight
+      const cameraOffset = (offset / 100) * Math.min(canvasWidth, canvasHeight)
 
       // 计算摄像头位置
       let x, y
-      const offsetX = 20
-      const offsetY = 20
 
       switch (position) {
         case "top-left":
-          x = offsetX
-          y = offsetY
+          x = cameraOffset
+          y = cameraOffset
           break
         case "top-right":
-          x = canvasWidth - size - offsetX
-          y = offsetY
+          x = canvasWidth - cameraSize - cameraOffset
+          y = cameraOffset
           break
         case "bottom-left":
-          x = offsetX
-          y = canvasHeight - size - offsetY
+          x = cameraOffset
+          y = canvasHeight - cameraSize - cameraOffset
           break
         case "bottom-right":
         default:
-          x = canvasWidth - size - offsetX
-          y = canvasHeight - size - offsetY
+          x = canvasWidth - cameraSize - cameraOffset
+          y = canvasHeight - cameraSize - cameraOffset
           break
       }
 
@@ -96,25 +97,25 @@ export const useRecording = ({
       // 创建裁剪区域
       ctx.beginPath()
       if (shape === "circle") {
-        ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2)
+        ctx.arc(x + cameraSize / 2, y + cameraSize / 2, cameraSize / 2, 0, Math.PI * 2)
       } else {
-        ctx.rect(x, y, size, size)
+        ctx.rect(x, y, cameraSize, cameraSize)
       }
       ctx.clip()
 
       // 绘制摄像头画面
       // 保持视频比例，进行覆盖填充
       const videoRatio = video.videoWidth / video.videoHeight
-      let drawWidth = size
-      let drawHeight = size / videoRatio
+      let drawWidth = cameraSize
+      let drawHeight = cameraSize / videoRatio
 
-      if (drawHeight < size) {
-        drawHeight = size
-        drawWidth = size * videoRatio
+      if (drawHeight < cameraSize) {
+        drawHeight = cameraSize
+        drawWidth = cameraSize * videoRatio
       }
 
-      const drawX = x + (size - drawWidth) / 2
-      const drawY = y + (size - drawHeight) / 2
+      const drawX = x + (cameraSize - drawWidth) / 2
+      const drawY = y + (cameraSize - drawHeight) / 2
 
       ctx.drawImage(video, drawX, drawY, drawWidth, drawHeight)
 

@@ -4,6 +4,7 @@
  */
 import { useState, useCallback, useEffect, useRef } from "react"
 import { convertToExcalidrawElements } from "@excalidraw/excalidraw"
+import { useExcalidrawScroll } from "./useExcalidrawScroll"
 
 /**
  * 计算演讲页尺寸
@@ -50,6 +51,9 @@ export const useSlides = ({ excalidrawRef, aspectRatio }) => {
 
   // 记录上一次 slides 长度，用于检测新增
   const prevSlidesLengthRef = useRef(slides.length)
+
+  // 平滑滚动 Hook
+  const { zoomToElementsSmooth } = useExcalidrawScroll(excalidrawRef)
 
   /**
    * 获取当前演讲页尺寸
@@ -147,15 +151,11 @@ export const useSlides = ({ excalidrawRef, aspectRatio }) => {
       )
 
       if (frameElement && frameElement[0]) {
-        // 使用 scrollToContent 自动滚动并缩放
-        excalidrawRef.current.scrollToContent([frameElement[0]], {
-          fitToContent: true,
-          animate: true, // 是否动画
-          duration: 500, // 动画时长
-        })
+        // 使用平滑滚动动画定位到演讲页
+        zoomToElementsSmooth([frameElement[0]])
       }
     },
-    [slides, excalidrawRef],
+    [slides, excalidrawRef, zoomToElementsSmooth],
   )
 
   /**

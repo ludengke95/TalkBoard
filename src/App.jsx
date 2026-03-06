@@ -56,6 +56,8 @@ function AppWithSettings() {
     isPageTurning,
     updateLockedViewState,
     setIsPageTurning,
+    // 录制时长
+    recordingDuration,
   } = useRecording({
     excalidrawRef,
     settings,
@@ -205,6 +207,7 @@ function AppWithSettings() {
         cornerRadius={cornerRadius}
         aspectRatio={aspectRatio}
         onCancel={handleCancelSelect}
+        recordingDuration={recordingDuration}
       />
 
       {/* 摄像头预览 */}

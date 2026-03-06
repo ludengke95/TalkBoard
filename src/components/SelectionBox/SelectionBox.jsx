@@ -3,12 +3,30 @@ import './SelectionBox.css'
 
 const HANDLE_SIZE = 10
 
+/**
+ * 格式化录制时长
+ * @param {number} seconds - 秒数
+ * @returns {string} 格式化后的时长字符串 (MM:SS 或 HH:MM:SS)
+ */
+const formatDuration = (seconds) => {
+  const hrs = Math.floor(seconds / 3600)
+  const mins = Math.floor((seconds % 3600) / 60)
+  const secs = seconds % 60
+
+  // 超过1小时显示 HH:MM:SS，否则显示 MM:SS
+  if (hrs > 0) {
+    return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+  }
+  return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
+}
+
 function SelectionBox({ 
   box, 
   recordingStep, 
   cornerRadius,
   aspectRatio,
-  onCancel 
+  onCancel,
+  recordingDuration = 0
 }) {
   const [isDragging, setIsDragging] = useState(false)
   const [dragType, setDragType] = useState(null)
@@ -151,7 +169,9 @@ function SelectionBox({
         onMouseDown={handleMouseDown}
       >
         {(recordingStep === 'ready' || isRecording) && (
-          <div className="rec-indicator">REC</div>
+          <div className="rec-indicator">
+            REC {formatDuration(recordingDuration)}
+          </div>
         )}
 
         {isBoxLocked && isSelecting && (

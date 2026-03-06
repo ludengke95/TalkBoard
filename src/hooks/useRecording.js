@@ -31,6 +31,10 @@ export const useRecording = ({
   const [recordingStep, setRecordingStep] = useState("idle")
   const [selectionBox, setSelectionBox] = useState(null)
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  
+  // 录制时长相关状态
+  const [recordingStartTime, setRecordingStartTime] = useState(null)
+  const [recordingDuration, setRecordingDuration] = useState(0)
 
   // Refs
   const mousePosRef = useRef({ x: 0, y: 0 })
@@ -244,6 +248,9 @@ export const useRecording = ({
   const handleCancelSelect = useCallback(() => {
     setSelectionBox(null)
     setRecordingStep("idle")
+    // 重置录制时长
+    setRecordingStartTime(null)
+    setRecordingDuration(0)
     // 取消选择时停止摄像头预览
     if (cameraStreamRef.current) {
       cameraStreamRef.current.getTracks().forEach((track) => track.stop())
@@ -488,6 +495,8 @@ export const useRecording = ({
 
     mediaRecorder.start(100)
     mediaRecorderRef.current = mediaRecorder
+    // 设置录制开始时间
+    setRecordingStartTime(Date.now())
     setRecordingStep("recording")
   }, [
     selectionBox,
@@ -524,6 +533,9 @@ export const useRecording = ({
     // 清除视图锁定状态
     lockedViewStateRef.current = null
     isPageTurningRef.current = false
+    // 重置录制时长
+    setRecordingStartTime(null)
+    setRecordingDuration(0)
     setRecordingStep("idle")
   }, [])
 
@@ -609,6 +621,25 @@ export const useRecording = ({
     return () => window.removeEventListener("mousemove", handleMouseMove)
   }, [recordingStep])
 
+  // 录制时长更新 effect
+  useEffect(() => {
+    // 只在录制状态下更新时长
+    if (recordingStep !== "recording" || !recordingStartTime) return
+
+    // 更新时长的函数
+    const updateDuration = () => {
+      const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000)
+      setRecordingDuration(elapsed)
+    }
+
+    // 立即更新一次
+    updateDuration()
+    // 每秒更新
+    const intervalId = setInterval(updateDuration, 1000)
+
+    return () => clearInterval(intervalId)
+  }, [recordingStep, recordingStartTime])
+
   return {
     // 状态
     recordingStep,
@@ -618,6 +649,8 @@ export const useRecording = ({
     // 视图锁定相关
     lockedViewState: lockedViewStateRef.current,
     isPageTurning: isPageTurningRef.current,
+    // 录制时长
+    recordingDuration,
     // 操作函数
     handleRecordClick,
     handleCancelSelect,

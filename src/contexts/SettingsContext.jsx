@@ -3,6 +3,7 @@
  * 使用 localStorage 持久化保存用户设置
  */
 import { createContext, useContext, useState, useEffect } from 'react'
+import i18n from '../i18n'
 
 // localStorage 存储键名
 const STORAGE_KEY = 'byv-settings'
@@ -11,6 +12,8 @@ const STORAGE_KEY = 'byv-settings'
 const defaultSettings = {
   // 主题模式
   theme: 'light',
+  // 语言设置
+  language: 'zh-CN',
   // 1. 画面比例
   aspectRatio: '16:9',
   // 2. 圆角半径
@@ -70,6 +73,13 @@ export function SettingsProvider({ children }) {
   useEffect(() => {
     saveSettings(settings)
   }, [settings])
+
+  // 同步语言设置到 i18n
+  useEffect(() => {
+    if (settings.language && i18n.language !== settings.language) {
+      i18n.changeLanguage(settings.language)
+    }
+  }, [settings.language])
 
   // 更新单个设置项
   const updateSetting = (key, value) => {

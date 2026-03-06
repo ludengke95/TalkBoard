@@ -2,22 +2,24 @@
  * 摄像头设置组件
  * 简洁单栏样式
  */
+import { useTranslation } from 'react-i18next'
 import { useSettings } from '../../contexts/SettingsContext'
 import { useMediaDevices } from '../../hooks/useMediaDevices'
 import Select from './Select'
 
 function CameraSetting() {
+  const { t } = useTranslation()
   const { settings, updateSetting } = useSettings()
   const { camera } = settings
   const { videoDevices } = useMediaDevices()
 
   const shapes = [
-    { value: 'circle', label: '圆形' },
-    { value: 'square', label: '方形' }
+    { value: 'circle', label: t('camera.shapeCircle') },
+    { value: 'square', label: t('camera.shapeSquare') }
   ]
 
   const deviceOptions = [
-    { value: '', label: '默认' },
+    { value: '', label: t('camera.defaultDevice') },
     ...videoDevices.map((device, index) => ({
       value: device.deviceId,
       label: device.label || `摄像头 ${index + 1}`
@@ -26,7 +28,7 @@ function CameraSetting() {
 
   return (
     <div className="setting-item">
-      <span className="setting-item-label">摄像头</span>
+      <span className="setting-item-label">{t('camera.label')}</span>
       <div className="setting-item-control">
         <button
           className={`toggle-switch ${camera.enabled ? 'active' : ''}`}
@@ -49,7 +51,7 @@ function CameraSetting() {
               value={camera.deviceId || ''}
               onChange={(deviceId) => updateSetting('camera', { ...camera, deviceId })}
               options={deviceOptions}
-              placeholder="选择设备"
+              placeholder={t('camera.selectDevice')}
             />
           </>
         )}

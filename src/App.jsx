@@ -22,7 +22,7 @@ import "./App.css"
  */
 function AppWithSettings() {
   const { settings, updateSetting } = useSettings()
-  const { mouseEffect, aspectRatio, cornerRadius, camera, microphone, theme } =
+  const { mouseEffect, aspectRatio, cornerRadius, camera, microphone, theme, language } =
     settings
   const { enumerateDevices } = useMediaDevices()
 
@@ -265,7 +265,7 @@ function AppWithSettings() {
               }
             }
           }}
-          langCode="zh-CN"
+          langCode={language}
           UIOptions={{
             canvasActions: {
               toggleTheme: true,

@@ -1,5 +1,6 @@
-import { useState, useCallback, useRef } from "react";
-import "./SlideToolbar.css";
+import { useState, useCallback, useRef } from "react"
+import { useTranslation } from "react-i18next"
+import "./SlideToolbar.css"
 
 function SlideToolbar({
   slides,
@@ -10,8 +11,9 @@ function SlideToolbar({
   onReorderSlides,
   readOnly,
 }) {
-  const [draggedIndex, setDraggedIndex] = useState(null);
-  const dragOverIndexRef = useRef(null);
+  const { t } = useTranslation()
+  const [draggedIndex, setDraggedIndex] = useState(null)
+  const dragOverIndexRef = useRef(null)
 
   const handleDragStart = useCallback((e, index) => {
     setDraggedIndex(index);
@@ -55,7 +57,7 @@ function SlideToolbar({
 
   return (
     <div className="slide-toolbar">
-      <div className="slide-toolbar-header">演讲页</div>
+      <div className="slide-toolbar-header">{t('slideToolbar.title')}</div>
 
       <div className="slide-list">
         {slides.map((slide, index) => (
@@ -76,7 +78,7 @@ function SlideToolbar({
                 className="slide-delete-btn"
                 onClick={(e) => handleDelete(e, index)}
                 disabled={readOnly}
-                title="删除演讲页"
+                title={t('slideToolbar.deleteSlide')}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -101,7 +103,7 @@ function SlideToolbar({
         className="slide-add-btn"
         onClick={onAddSlide}
         disabled={readOnly}
-        title="添加演讲页"
+        title={t('slideToolbar.addSlide')}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

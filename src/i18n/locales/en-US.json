@@ -1,0 +1,59 @@
+{
+  "toolbar": {
+    "settings": "Settings",
+    "teleprompter": "Teleprompter",
+    "startRecording": "Start Recording",
+    "confirmArea": "Confirm Area",
+    "stopRecording": "Stop Recording"
+  },
+  "settings": {
+    "title": "Settings",
+    "preview": "Preview",
+    "previewHint": "Recording Preview",
+    "reset": "Reset"
+  },
+  "language": {
+    "label": "Language",
+    "zhCN": "中文",
+    "enUS": "English"
+  },
+  "teleprompter": {
+    "title": "Teleprompter",
+    "speed": "Speed",
+    "opacity": "Opacity",
+    "pause": "Pause",
+    "play": "Play",
+    "close": "Close",
+    "placeholder": "Enter teleprompter text..."
+  },
+  "selectionBox": {
+    "locked": "Locked",
+    "cancel": "Cancel"
+  },
+  "slideToolbar": {
+    "title": "Slides",
+    "deleteSlide": "Delete Slide",
+    "addSlide": "Add Slide"
+  },
+  "slide": {
+    "name": "Slide"
+  },
+  "aspectRatio": {
+    "label": "Aspect Ratio"
+  },
+  "camera": {
+    "label": "Camera",
+    "shapeCircle": "Circle",
+    "shapeSquare": "Square",
+    "defaultDevice": "Default",
+    "selectDevice": "Select Device"
+  },
+  "microphone": {
+    "label": "Microphone",
+    "defaultDevice": "Default",
+    "selectDevice": "Select Device"
+  },
+  "mouseEffect": {
+    "label": "Mouse Effect"
+  }
+}

@@ -3,11 +3,13 @@
  * 简洁单栏样式
  */
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSettings } from '../../contexts/SettingsContext'
 import { useMediaDevices } from '../../hooks/useMediaDevices'
 import Select from './Select'
 
 function MicrophoneSetting() {
+  const { t } = useTranslation()
   const { settings, updateSetting } = useSettings()
   const { microphone } = settings
   const { audioDevices, audioStream, startAudio, stopAudio, isLoading } = useMediaDevices()
@@ -22,7 +24,7 @@ function MicrophoneSetting() {
   }, [microphone.enabled])
 
   const deviceOptions = [
-    { value: '', label: '默认' },
+    { value: '', label: t('microphone.defaultDevice') },
     ...audioDevices.map((device, index) => ({
       value: device.deviceId,
       label: device.label || `麦克风 ${index + 1}`
@@ -31,7 +33,7 @@ function MicrophoneSetting() {
 
   return (
     <div className="setting-item">
-      <span className="setting-item-label">麦克风</span>
+      <span className="setting-item-label">{t('microphone.label')}</span>
       <div className="setting-item-control">
         <button
           className={`toggle-switch ${microphone.enabled ? 'active' : ''}`}
@@ -60,7 +62,7 @@ function MicrophoneSetting() {
               value={microphone.deviceId || ''}
               onChange={(deviceId) => updateSetting('microphone', { ...microphone, deviceId })}
               options={deviceOptions}
-              placeholder="选择设备"
+              placeholder={t('microphone.selectDevice')}
             />
           </>
         )}

@@ -3,6 +3,7 @@
  * 简洁单栏样式
  */
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSettings } from '../../contexts/SettingsContext'
 
 const aspectRatios = [
@@ -14,6 +15,7 @@ const aspectRatios = [
 ]
 
 function AspectRatioSetting() {
+  const { t } = useTranslation()
   const { settings, updateSetting } = useSettings()
   const { aspectRatio } = settings
 
@@ -30,7 +32,7 @@ function AspectRatioSetting() {
 
   return (
     <div className="setting-item">
-      <span className="setting-item-label">画面比例</span>
+      <span className="setting-item-label">{t('aspectRatio.label')}</span>
       <div className="setting-item-control">
         <div className="radio-group">
           {aspectRatios.map(ratio => (

@@ -1,0 +1,59 @@
+{
+  "toolbar": {
+    "settings": "设置",
+    "teleprompter": "提词器",
+    "startRecording": "开始录制",
+    "confirmArea": "确认区域",
+    "stopRecording": "停止录制"
+  },
+  "settings": {
+    "title": "设置",
+    "preview": "预览",
+    "previewHint": "录制效果预览",
+    "reset": "重置"
+  },
+  "language": {
+    "label": "语言",
+    "zhCN": "中文",
+    "enUS": "English"
+  },
+  "teleprompter": {
+    "title": "提词器",
+    "speed": "速度",
+    "opacity": "透明度",
+    "pause": "暂停",
+    "play": "播放",
+    "close": "关闭",
+    "placeholder": "输入提词内容..."
+  },
+  "selectionBox": {
+    "locked": "已锁定",
+    "cancel": "取消"
+  },
+  "slideToolbar": {
+    "title": "演讲页",
+    "deleteSlide": "删除演讲页",
+    "addSlide": "添加演讲页"
+  },
+  "slide": {
+    "name": "演讲页"
+  },
+  "aspectRatio": {
+    "label": "画面比例"
+  },
+  "camera": {
+    "label": "摄像头",
+    "shapeCircle": "圆形",
+    "shapeSquare": "方形",
+    "defaultDevice": "默认",
+    "selectDevice": "选择设备"
+  },
+  "microphone": {
+    "label": "麦克风",
+    "defaultDevice": "默认",
+    "selectDevice": "选择设备"
+  },
+  "mouseEffect": {
+    "label": "鼠标效果"
+  }
+}

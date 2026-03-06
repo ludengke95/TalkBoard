@@ -2,6 +2,7 @@
  * 鼠标效果设置组件
  * 简洁单栏样式
  */
+import { useTranslation } from 'react-i18next'
 import { useSettings } from '../../contexts/SettingsContext'
 
 const presetColors = [
@@ -9,12 +10,13 @@ const presetColors = [
 ]
 
 function MouseEffectSetting() {
+  const { t } = useTranslation()
   const { settings, updateSetting } = useSettings()
   const { mouseEffect } = settings
 
   return (
     <div className="setting-item">
-      <span className="setting-item-label">鼠标效果</span>
+      <span className="setting-item-label">{t('mouseEffect.label')}</span>
       <div className="setting-item-control">
         <button
           className={`toggle-switch ${mouseEffect.enabled ? 'active' : ''}`}

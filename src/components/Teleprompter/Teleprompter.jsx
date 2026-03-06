@@ -1,9 +1,11 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import './Teleprompter.css'
 
 const STORAGE_KEY = 'byv-teleprompter-position'
 
 function Teleprompter({ theme, isVisible, onClose, content, onContentChange }) {
+  const { t } = useTranslation()
   const [percentPosition, setPercentPosition] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
     if (saved) {
@@ -115,11 +117,11 @@ function Teleprompter({ theme, isVisible, onClose, content, onContentChange }) {
       }}
     >
       <div className="teleprompter-header" onMouseDown={handleDragStart}>
-        <span className="teleprompter-title">提词器</span>
+        <span className="teleprompter-title">{t('teleprompter.title')}</span>
       </div>
       <div className="teleprompter-controls">
         <div className="control-group">
-          <span className="control-label">速度</span>
+          <span className="control-label">{t('teleprompter.speed')}</span>
           <input 
             type="range" 
             min="1" 
@@ -131,7 +133,7 @@ function Teleprompter({ theme, isVisible, onClose, content, onContentChange }) {
           <span className="control-value">{speed}</span>
         </div>
         <div className="control-group">
-          <span className="control-label">透明度</span>
+          <span className="control-label">{t('teleprompter.opacity')}</span>
           <input 
             type="range" 
             min="0" 
@@ -146,7 +148,7 @@ function Teleprompter({ theme, isVisible, onClose, content, onContentChange }) {
           <button 
             className="control-btn" 
             onClick={() => setIsPlaying(!isPlaying)}
-            title={isPlaying ? '暂停' : '播放'}
+            title={isPlaying ? t('teleprompter.pause') : t('teleprompter.play')}
           >
             {isPlaying ? (
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -161,7 +163,7 @@ function Teleprompter({ theme, isVisible, onClose, content, onContentChange }) {
           <button 
             className="control-btn close-btn" 
             onClick={onClose}
-            title="关闭"
+            title={t('teleprompter.close')}
           >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -172,7 +174,7 @@ function Teleprompter({ theme, isVisible, onClose, content, onContentChange }) {
       <textarea 
         ref={teleprompterRef}
         className="teleprompter-content"
-        placeholder="输入提词内容..."
+        placeholder={t('teleprompter.placeholder')}
         value={content}
         onChange={e => onContentChange(e.target.value)}
       />

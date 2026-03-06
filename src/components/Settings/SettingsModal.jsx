@@ -2,18 +2,21 @@
  * 设置弹窗主组件
  * 单栏紧凑布局 - 预览区在上，配置项在下
  */
-import { useEffect } from "react";
-import { useSettings } from "../../contexts/SettingsContext";
-import { useMediaDevices } from "../../hooks/useMediaDevices";
-import AspectRatioSetting from "./AspectRatioSetting";
-import CameraSetting from "./CameraSetting";
-import MicrophoneSetting from "./MicrophoneSetting";
-import MouseEffectSetting from "./MouseEffectSetting";
-import "./SettingsModal.css";
+import { useEffect } from "react"
+import { useTranslation } from "react-i18next"
+import { useSettings } from "../../contexts/SettingsContext"
+import { useMediaDevices } from "../../hooks/useMediaDevices"
+import LanguageSetting from "./LanguageSetting"
+import AspectRatioSetting from "./AspectRatioSetting"
+import CameraSetting from "./CameraSetting"
+import MicrophoneSetting from "./MicrophoneSetting"
+import MouseEffectSetting from "./MouseEffectSetting"
+import "./SettingsModal.css"
 
 function SettingsModal({ onClose }) {
-  const { settings, resetSettings } = useSettings();
-  const { videoStream, startVideo, stopVideo } = useMediaDevices();
+  const { t } = useTranslation()
+  const { settings, resetSettings } = useSettings()
+  const { videoStream, startVideo, stopVideo } = useMediaDevices()
 
   useEffect(() => {
     if (settings.camera.enabled && settings.camera.deviceId) {
@@ -46,7 +49,7 @@ function SettingsModal({ onClose }) {
       >
         {/* 头部 */}
         <div className="settings-header">
-          <h3>设置</h3>
+          <h3>{t("settings.title")}</h3>
           <button className="close-btn" onClick={onClose}>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -73,7 +76,7 @@ function SettingsModal({ onClose }) {
                     className="preview-recording-content"
                   >
                     <div className="preview-whiteboard">
-                      <span>预览</span>
+                      <span>{t("settings.preview")}</span>
                       {settings.mouseEffect.enabled && (
                         <div
                           className="preview-mouse-effect"
@@ -87,12 +90,13 @@ function SettingsModal({ onClose }) {
                   </div>
                 </div>
               </div>
-              <span className="preview-hint">录制效果预览</span>
+              <span className="preview-hint">{t("settings.previewHint")}</span>
             </div>
           </div>
 
           {/* 配置项列表 */}
           <div className="settings-list">
+            <LanguageSetting />
             <AspectRatioSetting />
             <CameraSetting />
             <MicrophoneSetting />
@@ -106,7 +110,7 @@ function SettingsModal({ onClose }) {
               onClick={resetSettings}
               style={{ padding: '8px 16px', fontSize: '13px' }}
             >
-              重置
+              {t("settings.reset")}
             </button>
           </div>
         </div>

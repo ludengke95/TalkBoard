@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import './SelectionBox.css'
 
 const HANDLE_SIZE = 10
@@ -28,6 +29,7 @@ function SelectionBox({
   onCancel,
   recordingDuration = 0
 }) {
+  const { t } = useTranslation()
   const [isDragging, setIsDragging] = useState(false)
   const [dragType, setDragType] = useState(null)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
@@ -175,7 +177,7 @@ function SelectionBox({
         )}
 
         {isBoxLocked && isSelecting && (
-          <div className="locked-indicator">已锁定</div>
+          <div className="locked-indicator">{t('selectionBox.locked')}</div>
         )}
         
         {!isRecording && isSelecting && !isBoxLocked && (
@@ -197,7 +199,7 @@ function SelectionBox({
       {recordingStep === 'selecting' && (
         <div className="selection-actions">
           <button className="btn-cancel" onClick={onCancel}>
-            取消
+            {t('selectionBox.cancel')}
           </button>
         </div>
       )}

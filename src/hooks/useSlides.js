@@ -5,6 +5,7 @@
 import { useState, useCallback, useEffect, useRef } from "react"
 import { convertToExcalidrawElements } from "@excalidraw/excalidraw"
 import { useExcalidrawScroll } from "./useExcalidrawScroll"
+import i18n from "../i18n"
 
 /**
  * 计算演讲页尺寸
@@ -217,7 +218,7 @@ export const useSlides = ({
 
     const newSlide = {
       id: generateId(),
-      name: `演讲页 ${slides.length + 1}`,
+      name: `${i18n.t('slide.name')} ${slides.length + 1}`,
       x: newX,
       y: 100,
       width: width,

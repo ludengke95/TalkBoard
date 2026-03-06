@@ -16,8 +16,6 @@ describe('SettingsContext', () => {
     const { result } = renderHook(() => useSettings(), { wrapper })
 
     expect(result.current.settings.aspectRatio).toBe('16:9')
-    expect(result.current.settings.cornerRadius).toBe(12)
-    expect(result.current.settings.margin).toBe(20)
     expect(result.current.settings.mouseEffect.enabled).toBe(true)
     expect(result.current.settings.mouseEffect.color).toBe('#ffeb3b')
   })

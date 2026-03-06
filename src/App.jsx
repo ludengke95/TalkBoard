@@ -16,6 +16,7 @@ import {
   Conversion,
   BlobSource,
   WEBM,
+  ALL_FORMATS,
 } from "mediabunny";
 import { SettingsProvider, useSettings } from "./contexts/SettingsContext";
 import SettingsModal from "./components/Settings/SettingsModal";
@@ -27,6 +28,150 @@ import SlideToolbar from "./components/SlideToolbar/SlideToolbar";
 import { useMediaDevices } from "./hooks/useMediaDevices";
 import CameraPreview from "./components/CameraPreview/CameraPreview";
 import "./App.css";
+
+/**
+ * 获取浏览器支持的最佳 MIME 类型
+ * 优先级：H264 > VP9 > VP8
+ * @returns {string} 支持的 MIME 类型
+ */
+const getSupportedMimeType = () => {
+  // 按优先级排列，优先 H264
+  const mimeTypes = [
+    "video/webm;codecs=h264,opus", // H264 视频 + Opus 音频
+    "video/webm;codecs=h264", // H264 视频（无音频）
+    "video/webm;codecs=vp9,opus", // VP9 视频 + Opus 音频
+    "video/webm;codecs=vp9", // VP9 视频
+    "video/webm;codecs=vp8,opus", // VP8 视频 + Opus 音频
+    "video/webm;codecs=vp8", // VP8 视频
+    "video/webm", // 默认
+  ];
+
+  // 查找第一个支持的类型
+  for (const mime of mimeTypes) {
+    if (MediaRecorder.isTypeSupported(mime)) {
+      console.log(`使用编码格式: ${mime}`);
+      return mime;
+    }
+  }
+
+  // 降级到默认
+  return "video/webm";
+};
+
+/**
+ * 检测 WebCodecs API 是否可用
+ * @returns {boolean} 是否支持
+ */
+const isWebCodecsSupported = () => {
+  return (
+    typeof VideoEncoder !== "undefined" &&
+    typeof VideoDecoder !== "undefined" &&
+    typeof AudioEncoder !== "undefined" &&
+    typeof AudioDecoder !== "undefined"
+  );
+};
+
+/**
+ * 检测视频编码是否为 H264
+ * @param {Input} input - mediabunny Input 实例
+ * @returns {Promise<boolean>} 是否为 H264 编码
+ */
+const isH264Encoded = async (input) => {
+  try {
+    const videoTrack = await input.getPrimaryVideoTrack();
+    // AVC 即 H264 编码
+    return videoTrack?.codec === "avc" || videoTrack?.codec === "h264";
+  } catch {
+    return false;
+  }
+};
+
+/**
+ * 智能转换视频，确保最佳兼容性
+ * 实现四级降级策略，确保输出 H264 编码的 MP4
+ * @param {Blob} webmBlob - 录制的 WebM 文件
+ * @returns {Promise<{ blob: Blob, filename: string }>} 转换结果
+ */
+const smartConvertVideo = async (webmBlob) => {
+  // 创建输入源
+  const input = new Input({
+    source: new BlobSource(webmBlob),
+    formats: ALL_FORMATS,
+  });
+
+  // 检测当前编码
+  const isH264 = await isH264Encoded(input);
+  const hasWebCodecs = isWebCodecsSupported();
+
+  // Level 1: 已经是 H264，只需容器转换（快速）
+  if (isH264) {
+    console.log("Level 1: H264 编码，容器转换");
+    const output = new Output({
+      format: new Mp4OutputFormat(),
+      target: new BufferTarget(),
+    });
+    const conversion = await Conversion.init({ input, output });
+    await conversion.execute();
+    return {
+      blob: new Blob([output.target.buffer], { type: "video/mp4" }),
+      filename: `whiteboard-${Date.now()}.mp4`,
+    };
+  }
+
+  // Level 2: 有 WebCodecs，进行编码转换（确保移动端兼容）
+  if (hasWebCodecs) {
+    console.log("Level 2: 编码转换为 H264");
+    try {
+      const output = new Output({
+        format: new Mp4OutputFormat(),
+        target: new BufferTarget(),
+      });
+      const conversion = await Conversion.init({
+        input,
+        output,
+        videoConfig: {
+          codec: "avc", // H264 编码
+          bitrate: 10_000_000, // 10 Mbps
+        },
+        audioConfig: {
+          codec: "aac", // AAC 音频（iOS 兼容）
+          bitrate: 128_000, // 128 kbps
+        },
+      });
+      await conversion.execute();
+      return {
+        blob: new Blob([output.target.buffer], { type: "video/mp4" }),
+        filename: `whiteboard-${Date.now()}.mp4`,
+      };
+    } catch (error) {
+      console.warn("编码转换失败，尝试容器转换:", error);
+    }
+  }
+
+  // Level 3: 容器转换（可能移动端不兼容）
+  console.log("Level 3: 容器转换");
+  try {
+    const output = new Output({
+      format: new Mp4OutputFormat(),
+      target: new BufferTarget(),
+    });
+    const conversion = await Conversion.init({ input, output });
+    await conversion.execute();
+    return {
+      blob: new Blob([output.target.buffer], { type: "video/mp4" }),
+      filename: `whiteboard-${Date.now()}.mp4`,
+    };
+  } catch (error) {
+    console.warn("容器转换失败:", error);
+  }
+
+  // Level 4: 返回原始 WebM（兜底）
+  console.log("Level 4: 返回原始 WebM");
+  return {
+    blob: webmBlob,
+    filename: `whiteboard-${Date.now()}.webm`,
+  };
+};
 
 function AppWithSettings() {
   const { settings, updateSetting } = useSettings();
@@ -606,10 +751,8 @@ function AppWithSettings() {
       }
     }
 
-    const isApple = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
-    const mimeType = isApple
-      ? "video/webm;codecs=vp8"
-      : "video/webm;codecs=vp9";
+    // 获取浏览器支持的最佳 MIME 类型（优先 H264）
+    const mimeType = getSupportedMimeType();
 
     const mediaRecorder = new MediaRecorder(stream, {
       mimeType,
@@ -650,29 +793,18 @@ function AppWithSettings() {
         const webmBlob = new Blob(chunksRef.current, { type: "video/webm" });
 
         try {
-          const input = new Input({
-            source: new BlobSource(webmBlob),
-            formats: [WEBM],
-          });
-          const output = new Output({
-            format: new Mp4OutputFormat(),
-            target: new BufferTarget(),
-          });
+          // 使用智能转换，确保输出 H264 编码的 MP4
+          const { blob, filename } = await smartConvertVideo(webmBlob);
 
-          const conversion = await Conversion.init({ input, output });
-          await conversion.execute();
-
-          const mp4Buffer = output.target.buffer;
-          const mp4Blob = new Blob([mp4Buffer], { type: "video/mp4" });
-
-          const url = URL.createObjectURL(mp4Blob);
+          const url = URL.createObjectURL(blob);
           const a = document.createElement("a");
           a.href = url;
-          a.download = `whiteboard-${Date.now()}.mp4`;
+          a.download = filename;
           a.click();
           URL.revokeObjectURL(url);
         } catch (error) {
           console.error("视频转换失败:", error);
+          // 降级：下载原始 WebM 文件
           const url = URL.createObjectURL(webmBlob);
           const a = document.createElement("a");
           a.href = url;

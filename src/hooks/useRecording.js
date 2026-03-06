@@ -12,9 +12,9 @@ import { useMediaDevices } from "./useMediaDevices"
  * @param {Object} options - 配置选项
  * @param {React.RefObject} options.excalidrawRef - Excalidraw API 引用
  * @param {Object} options.settings - 设置对象
- * @param {React.MutableRefObject} options.slidesRef - 演讲页数组的 ref
- * @param {React.MutableRefObject} options.getSlideSizeRef - 获取演讲页尺寸函数的 ref
- * @param {React.MutableRefObject} options.scrollToPageRef - 翻页函数的 ref
+ * @param {React.RefObject} options.slidesRef - 演讲页数组的 ref
+ * @param {React.RefObject} options.getSlideSizeRef - 获取演讲页尺寸函数的 ref
+ * @param {React.RefObject} options.scrollToPageRef - 翻页函数的 ref
  * @returns {Object} 录制状态和操作函数
  */
 export const useRecording = ({

@@ -250,8 +250,13 @@ export const useSlides = ({
    */
   const handlePrevPage = useCallback(() => {
     if (currentPage > 0) {
+      // selecting/ready/recording 状态都需要翻页回调来更新锁定视图
+      const isRecordingMode =
+        recordingStep === "selecting" ||
+        recordingStep === "ready" ||
+        recordingStep === "recording"
       scrollToPage(currentPage - 1, {
-        isRecording: recordingStep === "recording",
+        isRecording: isRecordingMode,
         onPageTurnStart,
         onPageTurnComplete,
       })
@@ -263,8 +268,13 @@ export const useSlides = ({
    */
   const handleNextPage = useCallback(() => {
     if (currentPage < slides.length - 1) {
+      // selecting/ready/recording 状态都需要翻页回调来更新锁定视图
+      const isRecordingMode =
+        recordingStep === "selecting" ||
+        recordingStep === "ready" ||
+        recordingStep === "recording"
       scrollToPage(currentPage + 1, {
-        isRecording: recordingStep === "recording",
+        isRecording: isRecordingMode,
         onPageTurnStart,
         onPageTurnComplete,
       })

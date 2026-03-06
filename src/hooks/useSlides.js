@@ -42,9 +42,18 @@ const generateId = () => {
  * @param {Object} options - 配置选项
  * @param {React.RefObject} options.excalidrawRef - Excalidraw API 引用
  * @param {string} options.aspectRatio - 画面比例
+ * @param {string} options.recordingStep - 录制状态
+ * @param {Function} options.onPageTurnStart - 翻页开始回调
+ * @param {Function} options.onPageTurnComplete - 翻页完成回调
  * @returns {Object} 演讲页状态和操作函数
  */
-export const useSlides = ({ excalidrawRef, aspectRatio }) => {
+export const useSlides = ({
+  excalidrawRef,
+  aspectRatio,
+  recordingStep,
+  onPageTurnStart,
+  onPageTurnComplete,
+}) => {
   // 演讲页状态
   const [slides, setSlides] = useState([])
   const [currentPage, setCurrentPage] = useState(0)
@@ -133,9 +142,14 @@ export const useSlides = ({ excalidrawRef, aspectRatio }) => {
   /**
    * 翻页到指定页
    * @param {number} pageIndex - 目标页码
+   * @param {Object} options - 可选配置
+   * @param {boolean} options.isRecording - 是否正在录制
+   * @param {Function} options.onPageTurnStart - 翻页开始回调
+   * @param {Function} options.onPageTurnComplete - 翻页完成回调
    */
   const scrollToPage = useCallback(
-    (pageIndex) => {
+    (pageIndex, options = {}) => {
+      const { isRecording, onPageTurnStart, onPageTurnComplete } = options
       console.log(pageIndex + "," + slides.length)
       if (!excalidrawRef.current || pageIndex < 0 || pageIndex >= slides.length)
         return
@@ -151,8 +165,24 @@ export const useSlides = ({ excalidrawRef, aspectRatio }) => {
       )
 
       if (frameElement && frameElement[0]) {
+        // 如果正在录制，通知开始翻页
+        if (isRecording && onPageTurnStart) {
+          onPageTurnStart()
+        }
+
         // 使用平滑滚动动画定位到演讲页
-        zoomToElementsSmooth([frameElement[0]])
+        // 传入完成回调
+        zoomToElementsSmooth([frameElement[0]], undefined, () => {
+          // 翻页动画完成后，如果正在录制，通知完成并更新锁定视图
+          if (isRecording && onPageTurnComplete) {
+            const appState = excalidrawRef.current.getAppState()
+            onPageTurnComplete({
+              scrollX: appState.scrollX,
+              scrollY: appState.scrollY,
+              zoom: appState.zoom.value,
+            })
+          }
+        })
       }
     },
     [slides, excalidrawRef, zoomToElementsSmooth],
@@ -220,18 +250,26 @@ export const useSlides = ({ excalidrawRef, aspectRatio }) => {
    */
   const handlePrevPage = useCallback(() => {
     if (currentPage > 0) {
-      scrollToPage(currentPage - 1)
+      scrollToPage(currentPage - 1, {
+        isRecording: recordingStep === "recording",
+        onPageTurnStart,
+        onPageTurnComplete,
+      })
     }
-  }, [currentPage, scrollToPage])
+  }, [currentPage, scrollToPage, recordingStep, onPageTurnStart, onPageTurnComplete])
 
   /**
    * 下一页
    */
   const handleNextPage = useCallback(() => {
     if (currentPage < slides.length - 1) {
-      scrollToPage(currentPage + 1)
+      scrollToPage(currentPage + 1, {
+        isRecording: recordingStep === "recording",
+        onPageTurnStart,
+        onPageTurnComplete,
+      })
     }
-  }, [currentPage, slides.length, scrollToPage])
+  }, [currentPage, slides.length, scrollToPage, recordingStep, onPageTurnStart, onPageTurnComplete])
 
   // 监听 slides 变化，新增演讲页时自动滚动到最后一个
   useEffect(() => {

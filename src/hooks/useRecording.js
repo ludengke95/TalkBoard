@@ -12,17 +12,17 @@ import { useMediaDevices } from "./useMediaDevices"
  * @param {Object} options - 配置选项
  * @param {React.RefObject} options.excalidrawRef - Excalidraw API 引用
  * @param {Object} options.settings - 设置对象
- * @param {Object} options.slides - 演讲页相关数据
- * @param {Function} options.getSlideSize - 获取演讲页尺寸的函数
- * @param {Function} options.scrollToPage - 翻页函数
+ * @param {React.MutableRefObject} options.slidesRef - 演讲页数组的 ref
+ * @param {React.MutableRefObject} options.getSlideSizeRef - 获取演讲页尺寸函数的 ref
+ * @param {React.MutableRefObject} options.scrollToPageRef - 翻页函数的 ref
  * @returns {Object} 录制状态和操作函数
  */
 export const useRecording = ({
   excalidrawRef,
   settings,
-  slides,
-  getSlideSize,
-  scrollToPage,
+  slidesRef,
+  getSlideSizeRef,
+  scrollToPageRef,
 }) => {
   const { mouseEffect, aspectRatio, cornerRadius, camera, microphone } = settings
   const { startVideo } = useMediaDevices()
@@ -43,6 +43,10 @@ export const useRecording = ({
   const cameraStreamRef = useRef(null)
   const audioStreamRef = useRef(null)
   const videoTrackRef = useRef(null)
+
+  // 视图锁定相关 Refs
+  const lockedViewStateRef = useRef(null)
+  const isPageTurningRef = useRef(false)
 
   /**
    * 绘制摄像头画面到画布
@@ -153,11 +157,12 @@ export const useRecording = ({
    */
   const handleStartSelect = useCallback(async () => {
     // 如果有演讲页，自动定位到第一个演讲页
-    if (slides.length > 0) {
+    const currentSlides = slidesRef.current
+    if (currentSlides.length > 0) {
       // 滚动到第一个演讲页
-      scrollToPage(0)
+      scrollToPageRef.current(0)
       setTimeout(() => {
-        const firstSlide = slides[0]
+        const firstSlide = currentSlides[0]
         // 从画布上获取第一个演讲页对应的 frame 元素的实际位置
         const elements = excalidrawRef.current?.getSceneElements() || []
         const firstFrame = elements.find((el) => el.id === firstSlide.id)
@@ -215,7 +220,7 @@ export const useRecording = ({
       }
     }
     setRecordingStep("selecting")
-  }, [initSelectionBox, camera, startVideo, slides, scrollToPage, excalidrawRef])
+  }, [initSelectionBox, camera, startVideo, slidesRef, scrollToPageRef, excalidrawRef])
 
   /**
    * 取消选择
@@ -229,10 +234,10 @@ export const useRecording = ({
       cameraStreamRef.current = null
     }
     // 重置演讲页状态
-    if (slides.length > 0) {
-      scrollToPage(0)
+    if (slidesRef.current.length > 0) {
+      scrollToPageRef.current(0)
     }
-  }, [slides, scrollToPage])
+  }, [slidesRef, scrollToPageRef])
 
   /**
    * 选择框变化处理
@@ -249,13 +254,21 @@ export const useRecording = ({
     if (!selectionBox || !excalidrawRef.current) return
 
     // 判断是否为演示模式
-    const isPresentationMode = slides.length > 0
+    const isPresentationMode = slidesRef.current.length > 0
+
+    // 保存录制开始时的视图状态
+    const appState = excalidrawRef.current.getAppState()
+    lockedViewStateRef.current = {
+      scrollX: appState.scrollX,
+      scrollY: appState.scrollY,
+      zoom: appState.zoom.value,
+    }
 
     // 根据模式决定视频输出尺寸
     let totalWidth, totalHeight
     if (isPresentationMode) {
       // 演示模式：使用演示页的固定尺寸
-      const slideSize = getSlideSize()
+      const slideSize = getSlideSizeRef.current()
       totalWidth = slideSize.width
       totalHeight = slideSize.height
     } else {
@@ -467,8 +480,8 @@ export const useRecording = ({
     microphone,
     startVideo,
     drawCameraToCanvas,
-    slides,
-    getSlideSize,
+    slidesRef,
+    getSlideSizeRef,
     excalidrawRef,
   ])
 
@@ -492,7 +505,26 @@ export const useRecording = ({
       cameraStreamRef.current = null
     }
     videoRef.current = null
+    // 清除视图锁定状态
+    lockedViewStateRef.current = null
+    isPageTurningRef.current = false
     setRecordingStep("idle")
+  }, [])
+
+  /**
+   * 更新锁定的视图状态（翻页后调用）
+   * @param {Object} newViewState - 新的视图状态
+   */
+  const updateLockedViewState = useCallback((newViewState) => {
+    lockedViewStateRef.current = newViewState
+  }, [])
+
+  /**
+   * 设置翻页状态标记
+   * @param {boolean} isTurning - 是否正在翻页
+   */
+  const setIsPageTurning = useCallback((isTurning) => {
+    isPageTurningRef.current = isTurning
   }, [])
 
   /**
@@ -567,10 +599,16 @@ export const useRecording = ({
     selectionBox,
     mousePos,
     cameraStream: cameraStreamRef.current,
+    // 视图锁定相关
+    lockedViewState: lockedViewStateRef.current,
+    isPageTurning: isPageTurningRef.current,
     // 操作函数
     handleRecordClick,
     handleCancelSelect,
     handleBoxChange,
     setRecordingStep,
+    // 视图锁定操作函数
+    updateLockedViewState,
+    setIsPageTurning,
   }
 }

@@ -20,9 +20,10 @@ export const useExcalidrawScroll = (excalidrawRef) => {
    * @param {number} targetState.scrollX - 目标 X 滚动位置
    * @param {number} targetState.scrollY - 目标 Y 滚动位置
    * @param {number} targetState.zoom - 目标缩放值
+   * @param {Function} onComplete - 动画完成回调
    */
   const animateTo = useCallback(
-    (targetState) => {
+    (targetState, onComplete) => {
       const api = excalidrawRef?.current
       if (!api) return
 
@@ -44,6 +45,7 @@ export const useExcalidrawScroll = (excalidrawRef) => {
               zoom: { value: targetState.zoom },
             },
           })
+          onComplete?.()
           return
         }
 
@@ -75,9 +77,10 @@ export const useExcalidrawScroll = (excalidrawRef) => {
    * @param {number} padding.right - 右边距
    * @param {number} padding.bottom - 下边距
    * @param {number} padding.left - 左边距
+   * @param {Function} onComplete - 动画完成回调
    */
   const zoomToElementsSmooth = useCallback(
-    (elements, padding = { top: 120, right: 60, bottom: 60, left: 60 }) => {
+    (elements, padding = { top: 120, right: 60, bottom: 60, left: 60 }, onComplete) => {
       const api = excalidrawRef?.current
       if (!api || !elements.length) return
 
@@ -104,7 +107,7 @@ export const useExcalidrawScroll = (excalidrawRef) => {
       const targetScrollY = visualCenterY / targetZoom - (minY + maxY) / 2
 
       // 执行平滑动画
-      animateTo({ scrollX: targetScrollX, scrollY: targetScrollY, zoom: targetZoom })
+      animateTo({ scrollX: targetScrollX, scrollY: targetScrollY, zoom: targetZoom }, onComplete)
     },
     [excalidrawRef, animateTo],
   )

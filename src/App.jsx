@@ -36,6 +36,53 @@ function AppWithSettings() {
   const [teleprompterContent, setTeleprompterContent] = useState("")
   const [teleprompterVisible, setTeleprompterVisible] = useState(false)
 
+  // 用于解决 useSlides 和 useRecording 之间的循环依赖
+  // 使用 ref 传递 slides 相关数据给 useRecording
+  const slidesRef = useRef([])
+  const getSlideSizeRef = useRef(() => ({ width: 1920, height: 1080 }))
+  const scrollToPageRef = useRef(() => {})
+
+  // 使用录制管理 Hook
+  const {
+    recordingStep,
+    selectionBox,
+    mousePos,
+    cameraStream,
+    handleRecordClick,
+    handleCancelSelect,
+    handleBoxChange,
+    // 视图锁定相关
+    lockedViewState,
+    isPageTurning,
+    updateLockedViewState,
+    setIsPageTurning,
+  } = useRecording({
+    excalidrawRef,
+    settings,
+    slidesRef,
+    getSlideSizeRef,
+    scrollToPageRef,
+  })
+
+  /**
+   * 翻页开始回调 - 设置翻页状态
+   */
+  const handlePageTurnStart = useCallback(() => {
+    setIsPageTurning(true)
+  }, [setIsPageTurning])
+
+  /**
+   * 翻页完成回调 - 更新锁定视图状态
+   * @param {Object} newViewState - 新的视图状态
+   */
+  const handlePageTurnComplete = useCallback(
+    (newViewState) => {
+      updateLockedViewState(newViewState)
+      setIsPageTurning(false)
+    },
+    [updateLockedViewState, setIsPageTurning],
+  )
+
   // 使用演讲页管理 Hook
   const {
     slides,
@@ -51,24 +98,23 @@ function AppWithSettings() {
   } = useSlides({
     excalidrawRef,
     aspectRatio,
+    recordingStep,
+    onPageTurnStart: handlePageTurnStart,
+    onPageTurnComplete: handlePageTurnComplete,
   })
 
-  // 使用录制管理 Hook
-  const {
-    recordingStep,
-    selectionBox,
-    mousePos,
-    cameraStream,
-    handleRecordClick,
-    handleCancelSelect,
-    handleBoxChange,
-  } = useRecording({
-    excalidrawRef,
-    settings,
-    slides,
-    getSlideSize,
-    scrollToPage,
-  })
+  // 更新 ref 以供 useRecording 使用
+  useEffect(() => {
+    slidesRef.current = slides
+  }, [slides])
+
+  useEffect(() => {
+    getSlideSizeRef.current = getSlideSize
+  }, [getSlideSize])
+
+  useEffect(() => {
+    scrollToPageRef.current = scrollToPage
+  }, [scrollToPage])
 
   // 同步主题到 html 元素
   useEffect(() => {
@@ -184,8 +230,33 @@ function AppWithSettings() {
           theme={theme}
           viewBackgroundColor={theme === "dark" ? "#1a1a1a" : "#ffffff"}
           onChange={(elements, appState) => {
+            // 同步主题
             if (appState.theme && appState.theme !== theme) {
               updateSetting("theme", appState.theme)
+            }
+
+            // 录制时锁定视图（翻页过程中不锁定）
+            if (
+              recordingStep === "recording" &&
+              lockedViewState &&
+              !isPageTurning
+            ) {
+              const { scrollX, scrollY, zoom } = lockedViewState
+              // 检测视图变化是否超过阈值
+              if (
+                Math.abs(appState.scrollX - scrollX) > 0.1 ||
+                Math.abs(appState.scrollY - scrollY) > 0.1 ||
+                Math.abs(appState.zoom.value - zoom) > 0.001
+              ) {
+                // 恢复到锁定的视图状态
+                excalidrawRef.current?.updateScene({
+                  appState: {
+                    scrollX,
+                    scrollY,
+                    zoom: { value: zoom },
+                  },
+                })
+              }
             }
           }}
           langCode="zh-CN"

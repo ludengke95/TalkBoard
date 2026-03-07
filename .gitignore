@@ -1,7 +1,44 @@
+# Dependencies
 node_modules
+
+# Build output
 dist
+build
+
+# IDE
 .idea
+.vscode
+*.swp
+*.swo
+
+# AI tools
 .sisyphus
 .history
 .opencode
 .trae
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Cache
+.cache
+.parcel-cache
+.eslintcache
+
+# Test coverage
+coverage
+
+# Temporary files
+*.tmp
+*.temp

@@ -15,6 +15,7 @@ import CameraPreview from "./components/CameraPreview/CameraPreview"
 import { useSlides } from "./hooks/useSlides"
 import { useRecording } from "./hooks/useRecording"
 import { useMediaDevices } from "./hooks/useMediaDevices"
+import { useExcalidrawStorage } from "./hooks/useExcalidrawStorage"
 import "./App.css"
 
 /**
@@ -28,6 +29,9 @@ function AppWithSettings() {
 
   // Excalidraw API 引用
   const excalidrawRef = useRef(null)
+
+  // 画布持久化
+  const { saveToStorage, loadFromStorage } = useExcalidrawStorage()
 
   // 设置弹窗状态
   const [showSettings, setShowSettings] = useState(false)
@@ -230,6 +234,7 @@ function AppWithSettings() {
           excalidrawAPI={(api) => {
             excalidrawRef.current = api
           }}
+          initialData={loadFromStorage()}
           theme={theme}
           viewBackgroundColor={theme === "dark" ? "#1a1a1a" : "#ffffff"}
           onChange={(elements, appState) => {
@@ -238,6 +243,9 @@ function AppWithSettings() {
             }
 
             syncSlidesWithFrames(elements)
+
+            // 保存画布内容到 localStorage
+            saveToStorage(elements, appState)
 
             // 录制时锁定视图（翻页过程中不锁定）
             // selecting/ready/recording 状态都需要锁定视图

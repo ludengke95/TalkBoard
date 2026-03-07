@@ -136,7 +136,10 @@ export const useSlides = ({
         }
         return el
       })
-      excalidrawRef.current.updateScene({ elements: updatedElements })
+      excalidrawRef.current.updateScene({ 
+        elements: updatedElements,
+        commitToHistory: true,
+      })
 
       const newSlides = slides.filter((_, idx) => idx !== pageToDelete)
       setSlides(newSlides)
@@ -248,6 +251,7 @@ export const useSlides = ({
     const existingElements = excalidrawRef.current.getSceneElements()
     excalidrawRef.current.updateScene({
       elements: [...existingElements, frameElement],
+      commitToHistory: true,
     })
 
     if (prevSlideFrameIdsRef.current) {

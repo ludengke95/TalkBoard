@@ -1,18 +1,27 @@
 /**
- * Excalidraw 平滑滚动 Hook
- * 提供平滑的视图滚动和缩放动画功能
+ * Excalidraw 滚动管理中心
+ * 统一管理画布滚动、视图锁定、演示页滚动等功能
  */
 import { useCallback, useRef } from "react"
 import { getCommonBounds } from "@excalidraw/excalidraw"
 
+// 滚动阈值常量
+const SCROLL_THRESHOLD_XY = 0.1
+const SCROLL_THRESHOLD_ZOOM = 0.001
+const ANIMATION_EASING = 0.15
+
 /**
- * 平滑滚动 Hook
+ * 滚动管理 Hook
  * @param {React.RefObject} excalidrawRef - Excalidraw API 引用
- * @returns {Object} 滚动相关方法
+ * @returns {Object} 滚动相关方法和状态
  */
 export const useExcalidrawScroll = (excalidrawRef) => {
   // 动画帧引用，用于取消动画
   const animationRef = useRef()
+  
+  // 视图锁定相关 Refs
+  const lockedViewStateRef = useRef(null)
+  const isPageTurningRef = useRef(false)
 
   /**
    * 平滑动画到目标状态
@@ -29,7 +38,6 @@ export const useExcalidrawScroll = (excalidrawRef) => {
 
       const step = () => {
         const currentState = api.getAppState()
-        const easing = 0.15 // 灵敏度，越小越平滑
 
         // 计算当前位置与目标的差距
         const dx = targetState.scrollX - currentState.scrollX
@@ -37,7 +45,7 @@ export const useExcalidrawScroll = (excalidrawRef) => {
         const dz = targetState.zoom - currentState.zoom.value
 
         // 如果差距足够小，停止动画并设置最终值
-        if (Math.abs(dx) < 0.1 && Math.abs(dy) < 0.1 && Math.abs(dz) < 0.001) {
+        if (Math.abs(dx) < SCROLL_THRESHOLD_XY && Math.abs(dy) < SCROLL_THRESHOLD_XY && Math.abs(dz) < SCROLL_THRESHOLD_ZOOM) {
           api.updateScene({
             appState: {
               scrollX: targetState.scrollX,
@@ -52,9 +60,9 @@ export const useExcalidrawScroll = (excalidrawRef) => {
         // 每一帧更新一小步（缓动效果）
         api.updateScene({
           appState: {
-            scrollX: currentState.scrollX + dx * easing,
-            scrollY: currentState.scrollY + dy * easing,
-            zoom: { value: currentState.zoom.value + dz * easing },
+            scrollX: currentState.scrollX + dx * ANIMATION_EASING,
+            scrollY: currentState.scrollY + dy * ANIMATION_EASING,
+            zoom: { value: currentState.zoom.value + dz * ANIMATION_EASING },
           },
         })
 
@@ -112,5 +120,124 @@ export const useExcalidrawScroll = (excalidrawRef) => {
     [excalidrawRef, animateTo],
   )
 
-  return { zoomToElementsSmooth }
+  /**
+   * 滚动到指定演示页
+   * @param {number} pageIndex - 页码索引
+   * @param {Array} slides - 演示页数组
+   * @param {Object} options - 可选配置
+   * @param {Function} options.onPageTurnStart - 翻页开始回调
+   * @param {Function} options.onPageTurnComplete - 翻页完成回调
+   */
+  const scrollToSlide = useCallback(
+    (pageIndex, slides, options = {}) => {
+      const { onPageTurnStart, onPageTurnComplete } = options
+      const api = excalidrawRef?.current
+
+      if (!api || pageIndex < 0 || pageIndex >= slides.length) return
+
+      const slide = slides[pageIndex]
+      const elements = api.getSceneElements()
+      const frameElement = elements.find(
+        (el) => el.type === "frame" && el.id === slide.id,
+      )
+
+      if (frameElement) {
+        if (onPageTurnStart) onPageTurnStart()
+
+        zoomToElementsSmooth([frameElement], undefined, () => {
+          if (onPageTurnComplete) {
+            const appState = api.getAppState()
+            onPageTurnComplete({
+              scrollX: appState.scrollX,
+              scrollY: appState.scrollY,
+              zoom: appState.zoom.value,
+            })
+          }
+        })
+      }
+    },
+    [excalidrawRef, zoomToElementsSmooth],
+  )
+
+  /**
+   * 锁定当前视图状态
+   */
+  const lockViewState = useCallback(() => {
+    const api = excalidrawRef?.current
+    if (!api) return
+    const appState = api.getAppState()
+    lockedViewStateRef.current = {
+      scrollX: appState.scrollX,
+      scrollY: appState.scrollY,
+      zoom: appState.zoom.value,
+    }
+  }, [excalidrawRef])
+
+  /**
+   * 解锁视图状态
+   */
+  const unlockViewState = useCallback(() => {
+    lockedViewStateRef.current = null
+    isPageTurningRef.current = false
+  }, [])
+
+  /**
+   * 更新锁定的视图状态（翻页后调用）
+   * @param {Object} newViewState - 新的视图状态
+   */
+  const updateLockedViewState = useCallback((newViewState) => {
+    lockedViewStateRef.current = newViewState
+  }, [])
+
+  /**
+   * 设置翻页状态标记
+   * @param {boolean} isTurning - 是否正在翻页
+   */
+  const setIsPageTurning = useCallback((isTurning) => {
+    isPageTurningRef.current = isTurning
+  }, [])
+
+  /**
+   * 检测并恢复视图（在 onChange 中调用）
+   * @param {Object} currentAppState - 当前 appState
+   * @returns {boolean} 是否恢复了视图
+   */
+  const checkAndRestoreView = useCallback((currentAppState) => {
+    if (!lockedViewStateRef.current || isPageTurningRef.current) {
+      return false
+    }
+
+    const { scrollX, scrollY, zoom } = lockedViewStateRef.current
+
+    if (
+      Math.abs(currentAppState.scrollX - scrollX) > SCROLL_THRESHOLD_XY ||
+      Math.abs(currentAppState.scrollY - scrollY) > SCROLL_THRESHOLD_XY ||
+      Math.abs(currentAppState.zoom.value - zoom) > SCROLL_THRESHOLD_ZOOM
+    ) {
+      excalidrawRef?.current?.updateScene({
+        appState: {
+          scrollX,
+          scrollY,
+          zoom: { value: zoom },
+        },
+      })
+      return true
+    }
+    return false
+  }, [excalidrawRef])
+
+  return {
+    // 动画函数
+    zoomToElementsSmooth,
+    scrollToSlide,
+
+    // 视图锁定
+    lockedViewState: lockedViewStateRef.current,
+    isPageTurning: isPageTurningRef.current,
+    lockViewState,
+    unlockViewState,
+    updateLockedViewState,
+    setIsPageTurning,
+    checkAndRestoreView,
+  }
 }

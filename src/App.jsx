@@ -2,7 +2,7 @@
  * 白板应用主组件
  * 基于 Excalidraw 的带提词器和屏幕录制功能的白板应用
  */
-import { useRef, useState, useCallback, useEffect } from "react"
+import { useRef, useState, useEffect } from "react"
 import { Excalidraw } from "@excalidraw/excalidraw"
 import { SettingsProvider, useSettings } from "./contexts/SettingsContext"
 import SettingsModal from "./components/Settings/SettingsModal"
@@ -16,6 +16,7 @@ import { useSlides } from "./hooks/useSlides"
 import { useRecording } from "./hooks/useRecording"
 import { useMediaDevices } from "./hooks/useMediaDevices"
 import { useExcalidrawStorage } from "./hooks/useExcalidrawStorage"
+import { useExcalidrawScroll } from "./hooks/useExcalidrawScroll"
 import "./App.css"
 
 /**
@@ -44,7 +45,16 @@ function AppWithSettings() {
   // 使用 ref 传递 slides 相关数据给 useRecording
   const slidesRef = useRef([])
   const getSlideSizeRef = useRef(() => ({ width: 1920, height: 1080 }))
-  const scrollToPageRef = useRef(() => {})
+
+  // 使用滚动管理 Hook（统一入口）
+  const {
+    scrollToSlide,
+    lockViewState,
+    unlockViewState,
+    updateLockedViewState,
+    setIsPageTurning,
+    checkAndRestoreView,
+  } = useExcalidrawScroll(excalidrawRef)
 
   // 使用录制管理 Hook
   const {
@@ -55,11 +65,6 @@ function AppWithSettings() {
     handleRecordClick,
     handleCancelSelect,
     handleBoxChange,
-    // 视图锁定相关
-    lockedViewState,
-    isPageTurning,
-    updateLockedViewState,
-    setIsPageTurning,
     // 录制时长
     recordingDuration,
   } = useRecording({
@@ -67,27 +72,11 @@ function AppWithSettings() {
     settings,
     slidesRef,
     getSlideSizeRef,
-    scrollToPageRef,
+    scrollToSlide,
+    lockViewState,
+    unlockViewState,
+    slides: slidesRef.current,
   })
-
-  /**
-   * 翻页开始回调 - 设置翻页状态
-   */
-  const handlePageTurnStart = useCallback(() => {
-    setIsPageTurning(true)
-  }, [setIsPageTurning])
-
-  /**
-   * 翻页完成回调 - 更新锁定视图状态
-   * @param {Object} newViewState - 新的视图状态
-   */
-  const handlePageTurnComplete = useCallback(
-    (newViewState) => {
-      updateLockedViewState(newViewState)
-      setIsPageTurning(false)
-    },
-    [updateLockedViewState, setIsPageTurning],
-  )
 
   // 使用演讲页管理 Hook
   const {
@@ -99,15 +88,18 @@ function AppWithSettings() {
     handleReorderSlides,
     handlePrevPage,
     handleNextPage,
-    scrollToPage,
     getSlideSize,
     syncSlidesWithFrames,
   } = useSlides({
     excalidrawRef,
     aspectRatio,
     recordingStep,
-    onPageTurnStart: handlePageTurnStart,
-    onPageTurnComplete: handlePageTurnComplete,
+    scrollToSlide,
+    onPageTurnStart: () => setIsPageTurning(true),
+    onPageTurnComplete: (viewState) => {
+      updateLockedViewState(viewState)
+      setIsPageTurning(false)
+    },
   })
 
   // 更新 ref 以供 useRecording 使用
@@ -118,10 +110,6 @@ function AppWithSettings() {
   useEffect(() => {
     getSlideSizeRef.current = getSlideSize
   }, [getSlideSize])
-
-  useEffect(() => {
-    scrollToPageRef.current = scrollToPage
-  }, [scrollToPage])
 
   // 同步主题到 html 元素
   useEffect(() => {
@@ -247,31 +235,11 @@ function AppWithSettings() {
             // 保存画布内容到 localStorage
             saveToStorage(elements, appState)
 
-            // 录制时锁定视图（翻页过程中不锁定）
-            // selecting/ready/recording 状态都需要锁定视图
-            if (
-              (recordingStep === "selecting" ||
-                recordingStep === "ready" ||
-                recordingStep === "recording") &&
-              lockedViewState &&
-              !isPageTurning
-            ) {
-              const { scrollX, scrollY, zoom } = lockedViewState
-              // 检测视图变化是否超过阈值
-              if (
-                Math.abs(appState.scrollX - scrollX) > 0.1 ||
-                Math.abs(appState.scrollY - scrollY) > 0.1 ||
-                Math.abs(appState.zoom.value - zoom) > 0.001
-              ) {
-                // 恢复到锁定的视图状态
-                excalidrawRef.current?.updateScene({
-                  appState: {
-                    scrollX,
-                    scrollY,
-                    zoom: { value: zoom },
-                  },
-                })
-              }
+            // 视图锁定检测（简化为一行）
+            if (recordingStep === "selecting" || 
+                recordingStep === "ready" || 
+                recordingStep === "recording") {
+              checkAndRestoreView(appState)
             }
           }}
           langCode={language}

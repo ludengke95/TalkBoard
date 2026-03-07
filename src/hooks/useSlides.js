@@ -62,6 +62,9 @@ export const useSlides = ({
   // 记录上一次 slides 长度，用于检测新增
   const prevSlidesLengthRef = useRef(slides.length)
 
+  // 跟踪上一次的演示页 frameIds，用于检测变化
+  const prevSlideFrameIdsRef = useRef(null)
+
   // 平滑滚动 Hook
   const { zoomToElementsSmooth } = useExcalidrawScroll(excalidrawRef)
 
@@ -88,11 +91,13 @@ export const useSlides = ({
         height: slideInfo.height || height,
         name: slideInfo.name,
         children: [],
+        customData: {
+          isSlide: true,
+        },
       }
       const elements = convertToExcalidrawElements([frameData], {
         regenerateIds: false,
       })
-      // 转换后再手动设置位置
       if (elements[0]) {
         elements[0].x = slideInfo.x
         elements[0].y = slideInfo.y
@@ -112,26 +117,20 @@ export const useSlides = ({
 
       const pageToDelete = index !== undefined ? index : currentPage
 
-      // 获取要删除的 slide 信息
       const slideToDelete = slides[pageToDelete]
       if (!slideToDelete) return
 
-      // 获取画布上的所有元素
       const elements = excalidrawRef.current.getSceneElements()
 
-      // 通过 slide.id 精确匹配 frame 元素（而不是依赖索引）
       const frameToDelete = elements.find(
         (el) => el.type === "frame" && el.id === slideToDelete.id,
       )
       if (!frameToDelete) return
 
-      // 删除 frame 及其内部所有子元素
       const updatedElements = elements.map((el) => {
-        // 删除 frame 本身
         if (el.id === frameToDelete.id) {
           return { ...el, isDeleted: true }
         }
-        // 删除 frame 内部的子元素（通过 frameId 关联）
         if (el.frameId === frameToDelete.id) {
           return { ...el, isDeleted: true }
         }
@@ -139,23 +138,23 @@ export const useSlides = ({
       })
       excalidrawRef.current.updateScene({ elements: updatedElements })
 
-      // 更新演讲页数组
       const newSlides = slides.filter((_, idx) => idx !== pageToDelete)
       setSlides(newSlides)
 
-      // 调整当前页码
+      if (prevSlideFrameIdsRef.current) {
+        prevSlideFrameIdsRef.current.delete(slideToDelete.id)
+      }
+
       let newCurrentPage = currentPage
       if (newSlides.length === 0) {
-        // 如果没有剩余页面，重置为 0
         newCurrentPage = 0
       } else if (pageToDelete < currentPage) {
-        // 如果删除的是当前页之前的页面，当前页码减 1
         newCurrentPage = currentPage - 1
       } else if (pageToDelete === currentPage) {
-        // 如果删除的是当前页，保持在当前索引（或最后一页）
         newCurrentPage = Math.min(currentPage, newSlides.length - 1)
       }
       setCurrentPage(newCurrentPage)
+      scrollToPage(newCurrentPage)
     },
     [slides, currentPage, excalidrawRef],
   )
@@ -230,7 +229,6 @@ export const useSlides = ({
     const gap = 80
 
     let newX = 100
-    // 从 React 状态中获取最后一个演讲页的位置
     if (slides.length > 0) {
       const lastSlide = slides[slides.length - 1]
       newX = lastSlide.x + lastSlide.width + gap
@@ -247,13 +245,15 @@ export const useSlides = ({
 
     const frameElement = createSlideElement(newSlide)
 
-    // 获取现有元素并追加新元素
     const existingElements = excalidrawRef.current.getSceneElements()
     excalidrawRef.current.updateScene({
       elements: [...existingElements, frameElement],
     })
 
-    // 更新演讲页状态
+    if (prevSlideFrameIdsRef.current) {
+      prevSlideFrameIdsRef.current.add(newSlide.id)
+    }
+
     setSlides((prev) => [...prev, newSlide])
   }, [slides, getSlideSize, createSlideElement, excalidrawRef])
 
@@ -346,27 +346,70 @@ export const useSlides = ({
 
   /**
    * 同步 slides 与画布上的 frame 元素
-   * 当 frame 被删除时，同步删除对应的 slide
+   * 处理双向同步：frame 删除/新增（撤销/重做）
    * @param {Array} elements - 画布上的所有元素
    */
   const syncSlidesWithFrames = useCallback(
     (elements) => {
-      const frameElements = elements.filter(
-        (el) => el.type === "frame" && !el.isDeleted,
+      const slideFrames = elements.filter(
+        (el) => el.type === "frame" && !el.isDeleted && el.customData?.isSlide === true,
       )
-      const frameIds = new Set(frameElements.map((el) => el.id))
+      const slideFrameIds = new Set(slideFrames.map((el) => el.id))
 
-      const deletedSlides = slides.filter((slide) => !frameIds.has(slide.id))
-
-      if (deletedSlides.length > 0) {
-        const newSlides = slides.filter((slide) => frameIds.has(slide.id))
-        setSlides(newSlides)
-
-        if (newSlides.length === 0) {
-          setCurrentPage(0)
-        } else if (currentPage >= newSlides.length) {
-          setCurrentPage(newSlides.length - 1)
+      if (prevSlideFrameIdsRef.current === null) {
+        prevSlideFrameIdsRef.current = slideFrameIds
+        if (slideFrames.length > 0 && slides.length === 0) {
+          const initialSlides = slideFrames.map((frame) => ({
+            id: frame.id,
+            name: frame.name || `${i18n.t('slide.name')}`,
+            x: frame.x,
+            y: frame.y,
+            width: frame.width,
+            height: frame.height,
+          }))
+          setSlides(initialSlides)
         }
+        return
+      }
+
+      const prevSlideFrameIds = prevSlideFrameIdsRef.current
+
+      const deletedIds = [...prevSlideFrameIds].filter((id) => !slideFrameIds.has(id))
+      const addedIds = [...slideFrameIds].filter((id) => !prevSlideFrameIds.has(id))
+
+      if (deletedIds.length === 0 && addedIds.length === 0) {
+        return
+      }
+
+      prevSlideFrameIdsRef.current = slideFrameIds
+
+      let newSlides = [...slides]
+
+      if (deletedIds.length > 0) {
+        newSlides = newSlides.filter((slide) => slideFrameIds.has(slide.id))
+      }
+
+      if (addedIds.length > 0) {
+        const addedSlides = addedIds.map((id) => {
+          const frame = slideFrames.find((el) => el.id === id)
+          return {
+            id: frame.id,
+            name: frame.name || `${i18n.t('slide.name')}`,
+            x: frame.x,
+            y: frame.y,
+            width: frame.width,
+            height: frame.height,
+          }
+        })
+        newSlides = [...newSlides, ...addedSlides]
+      }
+
+      setSlides(newSlides)
+
+      if (newSlides.length === 0) {
+        setCurrentPage(0)
+      } else if (currentPage >= newSlides.length) {
+        setCurrentPage(newSlides.length - 1)
       }
     },
     [slides, currentPage],

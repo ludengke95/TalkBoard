@@ -1,4 +1,4 @@
-/* 自定义下拉选择组件样式 */
+/* 自定义下拉选择组件样式 - Claude 风格 */
 .custom-select {
   position: relative;
   min-width: 140px;
@@ -9,11 +9,12 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  padding: 6px 10px;
+  padding: 8px 12px;
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  font-size: 12px;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
   color: var(--text-primary);
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -21,23 +22,25 @@
 
 .custom-select-trigger:hover {
   border-color: var(--color-primary);
+  background: var(--color-primary-light);
 }
 
 .custom-select-trigger:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(8, 145, 178, 0.2);
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
 }
 
 .custom-select.open .custom-select-trigger {
   border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
 }
 
 .custom-select-arrow {
   width: 14px;
   height: 14px;
   color: var(--text-secondary);
-  transition: transform var(--transition-fast);
+  transition: transform var(--transition-normal);
   flex-shrink: 0;
 }
 
@@ -47,49 +50,64 @@
 
 .custom-select-dropdown {
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + 6px);
   left: 0;
   right: 0;
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   z-index: 50;
-  max-height: 180px;
+  max-height: 200px;
   overflow-y: auto;
-  animation: selectDropdownIn 0.15s ease;
+  animation: selectDropdownIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes selectDropdownIn {
   from {
     opacity: 0;
-    transform: translateY(-4px);
+    transform: translateY(-8px) scale(0.96);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
 .custom-select-option {
   display: block;
   width: 100%;
-  padding: 8px 10px;
+  padding: 10px 12px;
   background: none;
   border: none;
-  font-size: 12px;
+  font-size: 13px;
+  font-weight: 500;
   color: var(--text-primary);
   text-align: left;
   cursor: pointer;
-  transition: background var(--transition-fast);
+  transition: all var(--transition-fast);
+}
+
+.custom-select-option:first-child {
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.custom-select-option:last-child {
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
 }
 
 .custom-select-option:hover {
-  background: var(--bg-secondary);
+  background: var(--color-primary-light);
+  color: var(--color-primary);
 }
 
 .custom-select-option.selected {
   background: var(--color-primary);
+  color: white;
+}
+
+.custom-select-option.selected:hover {
+  background: var(--color-primary-hover);
   color: white;
 }
 
@@ -100,6 +118,7 @@
 
 .custom-select.disabled .custom-select-trigger:hover {
   border-color: var(--border-color);
+  background: var(--bg-primary);
 }
 
 /* 滚动条样式 */

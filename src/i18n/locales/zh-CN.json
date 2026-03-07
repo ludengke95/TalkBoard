@@ -43,6 +43,8 @@
   },
   "camera": {
     "label": "摄像头",
+    "shape": "形状",
+    "device": "设备",
     "shapeCircle": "圆形",
     "shapeSquare": "方形",
     "defaultDevice": "默认",

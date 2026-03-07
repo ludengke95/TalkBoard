@@ -1,23 +1,24 @@
-/* 设置弹窗 - 单栏紧凑布局 */
+/* 设置弹窗 - Claude 风格 */
 .settings-modal-new {
-    width: 620px;
+    width: 640px;
     max-height: 85vh;
     display: flex;
     flex-direction: column;
     background: var(--bg-primary);
-    animation: modalSlideIn 0.2s ease;
+    animation: modalSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
     border-radius: var(--radius-xl);
     overflow: hidden;
+    box-shadow: var(--shadow-lg);
 }
 
 @keyframes modalSlideIn {
     from {
         opacity: 0;
-        transform: scale(0.95);
+        transform: translateY(12px) scale(0.98);
     }
     to {
         opacity: 1;
-        transform: scale(1);
+        transform: translateY(0) scale(1);
     }
 }
 
@@ -26,24 +27,25 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 16px 20px;
+    padding: 18px 24px;
     border-bottom: 1px solid var(--border-color);
     background: var(--bg-primary);
 }
 
 .settings-header h3 {
     margin: 0;
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 600;
     color: var(--text-primary);
+    letter-spacing: -0.01em;
 }
 
 .settings-header .close-btn {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border: none;
     background: transparent;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -57,6 +59,10 @@
     color: var(--text-primary);
 }
 
+.settings-header .close-btn:active {
+    transform: scale(0.95);
+}
+
 .settings-header .close-btn svg {
     width: 18px;
     height: 18px;
@@ -66,31 +72,31 @@
 .settings-body {
     flex: 1;
     overflow-y: auto;
-    padding: 20px;
+    padding: 24px;
 }
 
 /* 预览区 */
 .preview-section {
     display: flex;
     justify-content: center;
-    margin-bottom: 24px;
+    margin-bottom: 28px;
 }
 
 .preview-canvas-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
 .preview-canvas {
-    width: 220px;
-    height: 124px;
+    width: 240px;
+    height: 135px;
     background: var(--bg-tertiary);
     position: relative;
     overflow: hidden;
     box-shadow: var(--shadow-md);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-lg);
     transition: all var(--transition-normal);
 }
 
@@ -159,7 +165,7 @@
 }
 
 .camera-overlay.square {
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
 }
 
 .camera-video {
@@ -168,25 +174,27 @@
     object-fit: cover;
 }
 
-/* 配置项列表 - 紧凑单栏 */
+/* 配置项列表 */
 .settings-list {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
 }
 
 .setting-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 12px;
+    padding: 14px 16px;
     background: var(--bg-secondary);
-    border-radius: var(--radius-md);
-    transition: background var(--transition-fast);
+    border-radius: var(--radius-lg);
+    transition: all var(--transition-fast);
+    border: 1px solid transparent;
 }
 
 .setting-item:hover {
     background: var(--bg-tertiary);
+    border-color: var(--border-color);
 }
 
 .setting-item-label {
@@ -198,60 +206,64 @@
 .setting-item-control {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
 .setting-item-value {
     font-size: 12px;
     color: var(--text-muted);
-    min-width: 40px;
+    min-width: 44px;
     text-align: right;
+    font-variant-numeric: tabular-nums;
 }
 
 /* 滑块样式 */
 .setting-item .slider-input {
-    width: 100px;
-    height: 4px;
+    width: 120px;
+    height: 6px;
     -webkit-appearance: none;
     appearance: none;
-    background: var(--border-color);
-    border-radius: 2px;
+    background: linear-gradient(to right, var(--border-color) 0%, var(--border-color) 100%);
+    border-radius: 3px;
     outline: none;
     cursor: pointer;
-    transition: background var(--transition-fast);
+    transition: all var(--transition-fast);
 }
 
 .setting-item .slider-input:hover {
-    background: var(--text-muted);
+    background: linear-gradient(to right, var(--text-muted) 0%, var(--text-muted) 100%);
 }
 
 .setting-item .slider-input::-webkit-slider-thumb {
     -webkit-appearance: none;
-    width: 14px;
-    height: 14px;
+    width: 18px;
+    height: 18px;
     background: var(--color-primary);
     border-radius: 50%;
     cursor: pointer;
     transition: all var(--transition-fast);
-    border: 2px solid #fff;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+    border: 3px solid var(--bg-primary);
+    box-shadow: 0 2px 6px rgba(217, 119, 6, 0.3);
 }
 
 .setting-item .slider-input::-webkit-slider-thumb:hover {
-    transform: scale(1.15);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-    border-color: #e5e5e5;
+    transform: scale(1.1);
+    box-shadow: 0 3px 10px rgba(217, 119, 6, 0.4);
 }
 
-/* 开关 */
+.setting-item .slider-input::-webkit-slider-thumb:active {
+    transform: scale(1.15);
+}
+
+/* 开关 - 优化版 */
 .toggle-switch {
-    width: 40px;
-    height: 22px;
+    width: 48px;
+    height: 26px;
     background: var(--border-color);
-    border-radius: 11px;
+    border-radius: 13px;
     position: relative;
     cursor: pointer;
-    transition: background var(--transition-fast);
+    transition: all var(--transition-normal);
     border: none;
     padding: 0;
 }
@@ -262,43 +274,44 @@
 
 .toggle-switch.active {
     background: var(--color-primary);
+    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.35);
 }
 
 .toggle-switch.active:hover {
     background: var(--color-primary-hover);
+    box-shadow: 0 3px 12px rgba(217, 119, 6, 0.45);
 }
 
 .toggle-switch::after {
     content: "";
     position: absolute;
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
     background: white;
     border-radius: 50%;
     top: 3px;
     left: 3px;
-    transition: transform var(--transition-fast);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    transition: all var(--transition-normal);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .toggle-switch.active::after {
-    transform: translateX(0px);
-    right: 3px;
-    left: auto;
+    transform: translateX(22px);
 }
 
-/* 单选按钮组 */
+/* 单选按钮组 - 优化版 */
 .radio-group {
     display: flex;
-    gap: 4px;
+    gap: 6px;
 }
 
 .radio-btn {
-    padding: 4px 10px;
+    padding: 6px 14px;
     border: 1px solid var(--border-color);
     background: var(--bg-primary);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     font-size: 12px;
+    font-weight: 500;
     color: var(--text-secondary);
     cursor: pointer;
     transition: all var(--transition-fast);
@@ -306,12 +319,19 @@
 
 .radio-btn:hover {
     border-color: var(--color-primary);
+    color: var(--text-primary);
+    background: var(--color-primary-light);
+}
+
+.radio-btn:active {
+    transform: scale(0.97);
 }
 
 .radio-btn.active {
     background: var(--color-primary);
     border-color: var(--color-primary);
     color: white;
+    box-shadow: 0 2px 6px rgba(217, 119, 6, 0.3);
 }
 
 /* 响应式 */
@@ -329,7 +349,7 @@
     .setting-item {
         flex-direction: column;
         align-items: flex-start;
-        gap: 8px;
+        gap: 10px;
     }
 
     .setting-item-control {
@@ -342,8 +362,50 @@
     }
 }
 
+/* 摄像头设置 - 展开布局 */
+.camera-setting {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+}
+
+.camera-setting-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.camera-setting-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-light);
+}
+
+.camera-setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.camera-setting-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .settings-modal-new {
         animation: none;
+    }
+    
+    .toggle-switch::after {
+        transition: none;
+    }
+    
+    .radio-btn {
+        transition: none;
     }
 }

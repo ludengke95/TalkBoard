@@ -43,6 +43,8 @@
   },
   "camera": {
     "label": "Camera",
+    "shape": "Shape",
+    "device": "Device",
     "shapeCircle": "Circle",
     "shapeSquare": "Square",
     "defaultDevice": "Default",

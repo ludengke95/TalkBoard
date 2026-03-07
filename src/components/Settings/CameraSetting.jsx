@@ -27,16 +27,19 @@ function CameraSetting() {
   ]
 
   return (
-    <div className="setting-item">
-      <span className="setting-item-label">{t('camera.label')}</span>
-      <div className="setting-item-control">
+    <div className="setting-item camera-setting">
+      <div className="camera-setting-header">
+        <span className="setting-item-label">{t('camera.label')}</span>
         <button
           className={`toggle-switch ${camera.enabled ? 'active' : ''}`}
           onClick={() => updateSetting('camera', { ...camera, enabled: !camera.enabled })}
         />
-        {camera.enabled && (
-          <>
-            <div className="radio-group" style={{ marginLeft: '12px' }}>
+      </div>
+      {camera.enabled && (
+        <div className="camera-setting-options">
+          <div className="camera-setting-row">
+            <span className="camera-setting-label">{t('camera.shape')}</span>
+            <div className="radio-group">
               {shapes.map(shape => (
                 <button
                   key={shape.value}
@@ -47,40 +50,43 @@ function CameraSetting() {
                 </button>
               ))}
             </div>
+          </div>
+          <div className="camera-setting-row">
+            <span className="camera-setting-label">{t('camera.device')}</span>
             <Select
               value={camera.deviceId || ''}
               onChange={(deviceId) => updateSetting('camera', { ...camera, deviceId })}
               options={deviceOptions}
               placeholder={t('camera.selectDevice')}
             />
-          </>
-        )}
-      </div>
-      {camera.enabled && (
-        <div className="setting-item-control" style={{ marginTop: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', width: '32px' }}>{t('camera.size')}</span>
-            <input
-              type="range"
-              min="5"
-              max="50"
-              value={camera.size}
-              onChange={(e) => updateSetting('camera', { ...camera, size: Number(e.target.value) })}
-              style={{ width: '80px' }}
-            />
-            <span style={{ fontSize: '12px', width: '32px' }}>{camera.size}%</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '16px' }}>
-            <span style={{ fontSize: '12px', color: 'var(--text-secondary)', width: '32px' }}>{t('camera.offset')}</span>
-            <input
-              type="range"
-              min="0"
-              max="20"
-              value={camera.offset}
-              onChange={(e) => updateSetting('camera', { ...camera, offset: Number(e.target.value) })}
-              style={{ width: '60px' }}
-            />
-            <span style={{ fontSize: '12px', width: '28px' }}>{camera.offset}%</span>
+          <div className="camera-setting-row">
+            <span className="camera-setting-label">{t('camera.size')}</span>
+            <div className="setting-item-control">
+              <input
+                type="range"
+                className="slider-input"
+                min="5"
+                max="50"
+                value={camera.size}
+                onChange={(e) => updateSetting('camera', { ...camera, size: Number(e.target.value) })}
+              />
+              <span className="setting-item-value">{camera.size}%</span>
+            </div>
+          </div>
+          <div className="camera-setting-row">
+            <span className="camera-setting-label">{t('camera.offset')}</span>
+            <div className="setting-item-control">
+              <input
+                type="range"
+                className="slider-input"
+                min="0"
+                max="20"
+                value={camera.offset}
+                onChange={(e) => updateSetting('camera', { ...camera, offset: Number(e.target.value) })}
+              />
+              <span className="setting-item-value">{camera.offset}%</span>
+            </div>
           </div>
         </div>
       )}

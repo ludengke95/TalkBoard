@@ -307,23 +307,44 @@ export const useRecording = ({
     recordCanvasRef.current = recordCanvas
     const ctx = recordCanvas.getContext("2d")
 
-    // 如果启用了摄像头，初始化摄像头
+    // 如果启用了摄像头，初始化摄像头（如果还没有初始化）
     if (camera.enabled) {
-      const stream = await startVideo(camera.deviceId)
-      if (stream) {
-        cameraStreamRef.current = stream
-        const video = document.createElement("video")
-        video.srcObject = stream
-        video.autoplay = true
-        video.muted = true
-        video.playsInline = true
-        await new Promise((resolve) => {
-          video.onloadedmetadata = () => {
-            video.play()
-            resolve()
-          }
-        })
-        videoRef.current = video
+      // 如果已有摄像头流，复用它
+      if (cameraStreamRef.current) {
+        debugger
+        // 创建视频元素用于绘制（如果还没有或已失效）
+        if (!videoRef.current || videoRef.current.readyState < 2) {
+          const video = document.createElement("video")
+          video.srcObject = cameraStreamRef.current
+          video.autoplay = true
+          video.muted = true
+          video.playsInline = true
+          await new Promise((resolve) => {
+            video.onloadeddata = () => {
+              video.play()
+              resolve()
+            }
+          })
+          videoRef.current = video
+        }
+      } else {
+        // 没有摄像头流，创建新的
+        const stream = await startVideo(camera.deviceId)
+        if (stream) {
+          cameraStreamRef.current = stream
+          const video = document.createElement("video")
+          video.srcObject = stream
+          video.autoplay = true
+          video.muted = true
+          video.playsInline = true
+          await new Promise((resolve) => {
+            video.onloadeddata = () => {
+              video.play()
+              resolve()
+            }
+          })
+          videoRef.current = video
+        }
       }
     }
 

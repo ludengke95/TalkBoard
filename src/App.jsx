@@ -97,6 +97,7 @@ function AppWithSettings() {
     handleNextPage,
     scrollToPage,
     getSlideSize,
+    syncSlidesWithFrames,
   } = useSlides({
     excalidrawRef,
     aspectRatio,
@@ -232,10 +233,11 @@ function AppWithSettings() {
           theme={theme}
           viewBackgroundColor={theme === "dark" ? "#1a1a1a" : "#ffffff"}
           onChange={(elements, appState) => {
-            // 同步主题
             if (appState.theme && appState.theme !== theme) {
               updateSetting("theme", appState.theme)
             }
+
+            syncSlidesWithFrames(elements)
 
             // 录制时锁定视图（翻页过程中不锁定）
             // selecting/ready/recording 状态都需要锁定视图

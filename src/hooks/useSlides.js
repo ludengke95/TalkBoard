@@ -112,16 +112,27 @@ export const useSlides = ({
 
       const pageToDelete = index !== undefined ? index : currentPage
 
-      // 通过索引获取画布上的 frame 元素
-      const elements = excalidrawRef.current.getSceneElements()
-      const frameElements = elements.filter((el) => el.type === "frame")
-      const frameToDelete = frameElements[pageToDelete]
+      // 获取要删除的 slide 信息
+      const slideToDelete = slides[pageToDelete]
+      if (!slideToDelete) return
 
+      // 获取画布上的所有元素
+      const elements = excalidrawRef.current.getSceneElements()
+
+      // 通过 slide.id 精确匹配 frame 元素（而不是依赖索引）
+      const frameToDelete = elements.find(
+        (el) => el.type === "frame" && el.id === slideToDelete.id,
+      )
       if (!frameToDelete) return
 
-      // 从 Excalidraw 中删除 frame 元素
+      // 删除 frame 及其内部所有子元素
       const updatedElements = elements.map((el) => {
+        // 删除 frame 本身
         if (el.id === frameToDelete.id) {
+          return { ...el, isDeleted: true }
+        }
+        // 删除 frame 内部的子元素（通过 frameId 关联）
+        if (el.frameId === frameToDelete.id) {
           return { ...el, isDeleted: true }
         }
         return el
@@ -133,9 +144,18 @@ export const useSlides = ({
       setSlides(newSlides)
 
       // 调整当前页码
-      const newCurrentPage =
-        pageToDelete <= currentPage ? currentPage - 1 : currentPage
-      setCurrentPage(Math.max(0, newCurrentPage))
+      let newCurrentPage = currentPage
+      if (newSlides.length === 0) {
+        // 如果没有剩余页面，重置为 0
+        newCurrentPage = 0
+      } else if (pageToDelete < currentPage) {
+        // 如果删除的是当前页之前的页面，当前页码减 1
+        newCurrentPage = currentPage - 1
+      } else if (pageToDelete === currentPage) {
+        // 如果删除的是当前页，保持在当前索引（或最后一页）
+        newCurrentPage = Math.min(currentPage, newSlides.length - 1)
+      }
+      setCurrentPage(newCurrentPage)
     },
     [slides, currentPage, excalidrawRef],
   )
@@ -324,11 +344,37 @@ export const useSlides = ({
     return () => window.removeEventListener("keydown", handleKeyDown)
   }, [handleNextPage, handlePrevPage])
 
+  /**
+   * 同步 slides 与画布上的 frame 元素
+   * 当 frame 被删除时，同步删除对应的 slide
+   * @param {Array} elements - 画布上的所有元素
+   */
+  const syncSlidesWithFrames = useCallback(
+    (elements) => {
+      const frameElements = elements.filter(
+        (el) => el.type === "frame" && !el.isDeleted,
+      )
+      const frameIds = new Set(frameElements.map((el) => el.id))
+
+      const deletedSlides = slides.filter((slide) => !frameIds.has(slide.id))
+
+      if (deletedSlides.length > 0) {
+        const newSlides = slides.filter((slide) => frameIds.has(slide.id))
+        setSlides(newSlides)
+
+        if (newSlides.length === 0) {
+          setCurrentPage(0)
+        } else if (currentPage >= newSlides.length) {
+          setCurrentPage(newSlides.length - 1)
+        }
+      }
+    },
+    [slides, currentPage],
+  )
+
   return {
-    // 状态
     slides,
     currentPage,
-    // 操作函数
     setSlides,
     setCurrentPage,
     handleAddSlide,
@@ -339,5 +385,6 @@ export const useSlides = ({
     handleNextPage,
     scrollToPage,
     getSlideSize,
+    syncSlidesWithFrames,
   }
 }

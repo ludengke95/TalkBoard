@@ -5,7 +5,7 @@
 ## 项目概述
 
 - **项目名称**: byv-whiteboard (白板)
-- **技术栈**: Vite + React 18 + Excalidraw + Vitest
+- **技术栈**: Vite + React 18 + Excalidraw + Vitest + i18next
 - **用途**: 基于 Excalidraw 的带提词器和屏幕录制功能的白板应用
 
 ---
@@ -48,6 +48,7 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 
 // 2. 外部库
 import { Excalidraw } from '@excalidraw/excalidraw'
+import { useTranslation } from 'react-i18next'
 
 // 3. 本地导入 (先相对路径，后别名)
 import { useSettings } from './contexts/SettingsContext'
@@ -149,26 +150,83 @@ const fetchData = useCallback(async () => {
 - 使用 `useMemo` 缓存计算结果
 - 合理使用 `useEffect` 的依赖数组
 
+### 10. 国际化 (i18n)
+
+项目使用 i18next 进行国际化，支持中文和英文。
+
+```jsx
+// 在组件中使用
+import { useTranslation } from 'react-i18next'
+
+function Component() {
+  const { t } = useTranslation()
+  
+  return <div>{t('key.path')}</div>
+}
+```
+
+语言文件位于 `src/i18n/locales/`:
+- `zh-CN.json` - 简体中文
+- `en-US.json` - 英文
+
 ---
 
 ## 项目结构
 
 ```
-byv/
+TalkBoard/
 ├── src/
 │   ├── main.jsx              # 入口文件
 │   ├── App.jsx               # 主应用组件
 │   ├── App.css               # 主样式
 │   ├── index.css             # 全局样式
 │   ├── components/           # 组件目录
-│   │   └── ComponentName/
-│   │       ├── ComponentName.jsx
-│   │       └── ComponentName.css
+│   │   ├── CameraPreview/    # 摄像头预览组件
+│   │   │   ├── CameraPreview.jsx
+│   │   │   └── CameraPreview.css
+│   │   ├── CursorIndicator/  # 光标指示器组件
+│   │   │   ├── CursorIndicator.jsx
+│   │   │   └── CursorIndicator.css
+│   │   ├── SelectionBox/     # 选择框组件
+│   │   │   ├── SelectionBox.jsx
+│   │   │   └── SelectionBox.css
+│   │   ├── Settings/         # 设置相关组件
+│   │   │   ├── SettingsModal.jsx
+│   │   │   ├── SettingsModal.css
+│   │   │   ├── AspectRatioSetting.jsx
+│   │   │   ├── CameraSetting.jsx
+│   │   │   ├── LanguageSetting.jsx
+│   │   │   ├── MicrophoneSetting.jsx
+│   │   │   ├── MouseEffectSetting.jsx
+│   │   │   ├── Select.jsx
+│   │   │   └── Select.css
+│   │   ├── SlideToolbar/     # 幻灯片工具栏组件
+│   │   │   ├── SlideToolbar.jsx
+│   │   │   └── SlideToolbar.css
+│   │   ├── Teleprompter/     # 提词器组件
+│   │   │   ├── Teleprompter.jsx
+│   │   │   └── Teleprompter.css
+│   │   └── Toolbar/          # 主工具栏组件
+│   │       ├── Toolbar.jsx
+│   │       └── Toolbar.css
 │   ├── contexts/             # React Context
+│   │   └── SettingsContext.jsx
 │   ├── hooks/                # 自定义 Hooks
+│   │   ├── useExcalidrawScroll.js
+│   │   ├── useExcalidrawStorage.js
+│   │   ├── useMediaDevices.js
+│   │   ├── useRecording.js
+│   │   └── useSlides.js
+│   ├── i18n/                 # 国际化配置
+│   │   ├── index.js
+│   │   └── locales/
+│   │       ├── en-US.json
+│   │       └── zh-CN.json
+│   ├── utils/                # 工具函数
+│   │   └── videoUtils.js
 │   └── test/                 # 测试文件
 │       ├── setup.js          # 测试环境配置
-│       └── *.test.jsx
+│       └── SettingsContext.test.jsx
 ├── index.html
 ├── vite.config.js
 └── package.json
@@ -182,6 +240,7 @@ byv/
 2. **Excalidraw**: 项目集成了 Excalidraw 白板库，需注意其 API 兼容性
 3. **媒体录制**: 使用 MediaRecorder API 进行屏幕录制
 4. **视频转换**: 使用 mediabunny 库将 WebM 转换为 MP4
+5. **国际化**: 使用 i18next + react-i18next 实现多语言支持，语言文件位于 `src/i18n/locales/`
 
 ---
 
@@ -190,4 +249,11 @@ byv/
 - 状态逻辑: `src/App.jsx`
 - Context: `src/contexts/SettingsContext.jsx`
 - 自定义 Hooks: `src/hooks/`
+  - `useExcalidrawScroll.js` - Excalidraw 滚动控制
+  - `useExcalidrawStorage.js` - Excalidraw 存储管理
+  - `useMediaDevices.js` - 媒体设备管理
+  - `useRecording.js` - 录制功能
+  - `useSlides.js` - 幻灯片管理
+- 国际化: `src/i18n/`
+- 视频工具: `src/utils/videoUtils.js`
 - 测试设置: `src/test/setup.js`

@@ -1,5 +1,5 @@
 {
-  "name": "byv-whiteboard",
+  "name": "talk-board",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -25,6 +25,7 @@
     "@vitejs/plugin-react": "^4.2.1",
     "jsdom": "^28.1.0",
     "vite": "^5.0.0",
-    "vitest": "^4.0.18"
+    "vitest": "^4.0.18",
+    "wrangler": "^4.71.0"
   }
 }

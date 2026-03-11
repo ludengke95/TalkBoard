@@ -4,7 +4,8 @@
     "teleprompter": "Teleprompter",
     "startRecording": "Start Recording",
     "confirmArea": "Confirm Area",
-    "stopRecording": "Stop Recording"
+    "stopRecording": "Stop Recording",
+    "help": "Help"
   },
   "settings": {
     "title": "Settings",
@@ -59,5 +60,38 @@
   },
   "mouseEffect": {
     "label": "Mouse Effect"
+  },
+  "help": {
+    "title": "About",
+    "links": "Links",
+    "projectIntro": "A whiteboard application with teleprompter and screen recording, based on Excalidraw",
+    "videoResolution": "Video Resolution",
+    "presentationMode": "Presentation Mode: Fixed resolution based on aspect ratio",
+    "nonPresentationMode": "Non-Presentation Mode: Actual screen resolution",
+    "usage": "Usage",
+    "shortcuts": "Shortcuts",
+    "nextPage": "Next page",
+    "prevPage": "Previous page",
+    "github": "GitHub",
+    "demo": "Demo",
+    "demoBackup": "Demo (Backup)",
+    "version": "Version",
+    "faq": "FAQ",
+    "faqCameraQ": "What if my device has no camera?",
+    "faqCameraA": "You can use DroidCam to turn your phone into a webcam",
+    "faqMicrophoneQ": "What if my device has no microphone?",
+    "faqMicrophoneA": "You can use your phone as a microphone with WO Mic or DroidCam",
+    "faqFormatQ": "What format is the recorded video?",
+    "faqFormatA": "The recorded video is in MP4 format and can be downloaded directly",
+    "faqBrowserQ": "Which browsers are supported?",
+    "faqBrowserA": "Chrome, Edge, Firefox and other modern browsers are recommended",
+    "faqExportQ": "How to export/import canvas content?",
+    "faqExportA": "Use Excalidraw's built-in export/import function",
+    "faqFontQ": "What if Chinese handwriting font doesn't appear?",
+    "faqFontA": "Try refreshing the page, font loading may take time",
+    "usageStep1": "Draw on canvas - Use Excalidraw tools",
+    "usageStep2": "Add slides - Click \"+\" to add presentation pages",
+    "usageStep3": "Open teleprompter - Click the teleprompter icon",
+    "usageStep4": "Start recording - Click record button, select area and start"
   }
 }

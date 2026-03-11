@@ -4,7 +4,8 @@
     "teleprompter": "提词器",
     "startRecording": "开始录制",
     "confirmArea": "确认区域",
-    "stopRecording": "停止录制"
+    "stopRecording": "停止录制",
+    "help": "帮助"
   },
   "settings": {
     "title": "设置",
@@ -59,5 +60,38 @@
   },
   "mouseEffect": {
     "label": "鼠标效果"
+  },
+  "help": {
+    "title": "关于",
+    "links": "链接",
+    "projectIntro": "基于 Excalidraw 的带提词器和屏幕录制功能的白板应用",
+    "videoResolution": "视频像素说明",
+    "presentationMode": "演示模式：根据画面比例设置固定像素大小",
+    "nonPresentationMode": "非演示模式：取实际屏幕像素大小",
+    "usage": "使用说明",
+    "shortcuts": "快捷键",
+    "nextPage": "下一页",
+    "prevPage": "上一页",
+    "github": "GitHub 仓库",
+    "demo": "在线演示",
+    "demoBackup": "在线演示(备用)",
+    "version": "版本",
+    "faq": "常见问题",
+    "faqCameraQ": "录制设备没有摄像头怎么办？",
+    "faqCameraA": "可以使用 DroidCam 将手机变成摄像头",
+    "faqMicrophoneQ": "录制设备没有麦克风怎么办？",
+    "faqMicrophoneA": "可以使用手机作为麦克风，推荐使用 WO Mic 或 DroidCam",
+    "faqFormatQ": "录制的视频是什么格式？",
+    "faqFormatA": "录制的视频为 MP4 格式，可以直接下载到本地",
+    "faqBrowserQ": "支持哪些浏览器？",
+    "faqBrowserA": "推荐使用 Chrome、Edge、Firefox 等现代浏览器",
+    "faqExportQ": "如何导出/导入画布内容？",
+    "faqExportA": "使用 Excalidraw 自带的导出/导入功能",
+    "faqFontQ": "页面中文没有出现手写体怎么办？",
+    "faqFontA": "可以刷新页面重试，字体加载可能需要时间",
+    "usageStep1": "在画布上绘图 - 使用 Excalidraw 工具进行绘制",
+    "usageStep2": "添加幻灯片 - 点击 \"+\" 添加演示页",
+    "usageStep3": "打开提词器 - 点击提词器图标",
+    "usageStep4": "开始录制 - 点击录制按钮，选择区域后开始"
   }
 }

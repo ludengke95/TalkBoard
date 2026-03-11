@@ -6,6 +6,7 @@ import { useRef, useState, useEffect } from "react"
 import { Excalidraw } from "@excalidraw/excalidraw"
 import { SettingsProvider, useSettings } from "./contexts/SettingsContext"
 import SettingsModal from "./components/Settings/SettingsModal"
+import HelpModal from "./components/Help/HelpModal"
 import Toolbar from "./components/Toolbar/Toolbar"
 import Teleprompter from "./components/Teleprompter/Teleprompter"
 import SelectionBox from "./components/SelectionBox/SelectionBox"
@@ -36,6 +37,12 @@ function AppWithSettings() {
 
   // 设置弹窗状态
   const [showSettings, setShowSettings] = useState(false)
+
+  // 帮助弹窗状态 - 第一次访问时默认打开
+  const [showHelp, setShowHelp] = useState(() => {
+    const hasVisited = localStorage.getItem("byv-has-visited")
+    return !hasVisited
+  })
 
   // 提词器状态
   const [teleprompterContent, setTeleprompterContent] = useState("")
@@ -154,6 +161,7 @@ function AppWithSettings() {
         onRecordClick={handleRecordClick}
         recordingStep={recordingStep}
         hasTeleprompterContent={teleprompterContent.trim().length > 0}
+        onHelpClick={() => setShowHelp(!showHelp)}
       />
 
       {/* 演讲页工具栏 */}
@@ -172,6 +180,15 @@ function AppWithSettings() {
       {/* 设置弹窗 */}
       {showSettings && (
         <SettingsModal theme={theme} onClose={() => setShowSettings(false)} />
+      )}
+
+      {/* 帮助弹窗 */}
+      {showHelp && (
+        <HelpModal onClose={() => {
+          setShowHelp(false)
+          // 标记用户已访问过
+          localStorage.setItem("byv-has-visited", "true")
+        }} />
       )}
 
       {/* 提词器 */}

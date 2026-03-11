@@ -26,8 +26,9 @@
 |------|------|
 | `npm run test` | 启动 Vitest 测试监听模式 |
 | `npm run test:run` | 单次运行所有测试 |
-| `npm run test -- --run <file>` | 运行单个测试文件 |
-| `npm run test -- --run -t "<pattern>"` | 运行单个测试用例 (按名称匹配) |
+| `npm run test -- <file>` | 运行单个测试文件 |
+| `npm run test -- -t "<pattern>"` | 运行单个测试用例 (按名称匹配) |
+| `npm run test -- --coverage` | 运行测试并生成覆盖率报告 |
 
 ---
 
@@ -149,8 +150,16 @@ const fetchData = useCallback(async () => {
 - 使用 `useCallback` 缓存回调函数
 - 使用 `useMemo` 缓存计算结果
 - 合理使用 `useEffect` 的依赖数组
+- 避免在 useEffect 中使用 async 函数，直接调用 async 函数而不是 await
 
-### 10. 国际化 (i18n)
+### 10. TypeScript 注意事项
+
+项目目前使用 JavaScript (JSX)，暂无 TypeScript 配置。如需添加 TypeScript：
+- 安装 `typescript` 和 `@vitejs/plugin-react-swc`
+- 创建 `tsconfig.json` 配置文件
+- 修改 `vite.config.js` 使用 SWC 插件
+
+### 11. 国际化 (i18n)
 
 项目使用 i18next 进行国际化，支持中文和英文。
 
@@ -234,6 +243,12 @@ TalkBoard/
 
 ---
 
+## Lint 与代码检查
+
+项目目前未配置 ESLint 或其他代码检查工具。建议添加：
+- ESLint + Prettier 用于代码格式化和风格检查
+- 可以在 VS Code 中安装 ESLint 插件获得即时反馈
+
 ## 开发注意事项
 
 1. **Vite 配置**: 开发服务器运行在端口 3000，且不自动打开浏览器
@@ -241,6 +256,8 @@ TalkBoard/
 3. **媒体录制**: 使用 MediaRecorder API 进行屏幕录制
 4. **视频转换**: 使用 mediabunny 库将 WebM 转换为 MP4
 5. **国际化**: 使用 i18next + react-i18next 实现多语言支持，语言文件位于 `src/i18n/locales/`
+6. **CLI 工具**: 项目包含 CLI 工具，可通过 `npx talkboard` 调用，位于 `bin/talkboard.js`
+7. **测试环境**: 使用 jsdom + @testing-library/react 进行组件测试
 
 ---
 

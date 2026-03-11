@@ -17,14 +17,27 @@
 **[立即体验 1 →](https://talkboard.20251005.xyz)**
 **[立即体验 2（备用） →](https://ludengke95.github.io/TalkBoard)**
 
-## 快速开始
+## 安装方式
 
-### 环境要求
+### 方式一：通过 npm 安装（推荐）
 
-- Node.js 18+
-- npm 9+
+```bash
+# 全局安装
+npm install -g talkboard
 
-### 安装
+# 启动服务
+talkboard start
+
+# 指定端口启动
+talkboard start -p 8080
+
+# 后台模式启动
+talkboard start -d
+```
+
+在浏览器中打开 [http://localhost:3000](http://localhost:3000)。
+
+### 方式二：从源码构建
 
 ```bash
 # 克隆仓库
@@ -40,7 +53,43 @@ npm run dev
 
 在浏览器中打开 [http://localhost:3000](http://localhost:3000)。
 
-### 构建
+## 命令行工具
+
+```bash
+talkboard start [选项]     # 启动服务
+talkboard stop             # 停止服务
+talkboard status           # 查看服务状态
+talkboard --help           # 显示帮助
+talkboard --version        # 显示版本
+```
+
+### 启动选项
+
+| 选项 | 说明 |
+|------|------|
+| `-p, --port <端口>` | 指定端口号（默认：3000） |
+| `-d, --daemon` | 后台运行模式 |
+
+### 使用示例
+
+```bash
+# 默认端口启动
+talkboard start
+
+# 指定端口启动
+talkboard start -p 8080
+
+# 后台模式启动
+talkboard start -d
+
+# 查看服务状态
+talkboard status
+
+# 停止服务
+talkboard stop
+```
+
+## 构建
 
 ```bash
 npm run build

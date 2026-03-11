@@ -19,14 +19,27 @@ A web-based whiteboard application with teleprompter and screen recording capabi
 
 Record your whiteboard presentations with camera overlay and export as MP4.
 
-## Getting Started
+## Installation
 
-### Prerequisites
+### Option 1: Install via npm (Recommended)
 
-- Node.js 18+
-- npm 9+
+```bash
+# Install globally
+npm install -g talkboard
 
-### Installation
+# Start the service
+talkboard start
+
+# Start with custom port
+talkboard start -p 8080
+
+# Start in background mode
+talkboard start -d
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Option 2: Build from Source
 
 ```bash
 # Clone the repository
@@ -42,7 +55,43 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### Build
+## CLI Commands
+
+```bash
+talkboard start [options]    # Start the service
+talkboard stop               # Stop the service
+talkboard status             # View service status
+talkboard --help             # Show help
+talkboard --version          # Show version
+```
+
+### Start Options
+
+| Option | Description |
+|--------|-------------|
+| `-p, --port <port>` | Specify port (default: 3000) |
+| `-d, --daemon` | Run in background mode |
+
+### Examples
+
+```bash
+# Start service on default port
+talkboard start
+
+# Start service on port 8080
+talkboard start -p 8080
+
+# Start service in background
+talkboard start -d
+
+# Check service status
+talkboard status
+
+# Stop service
+talkboard stop
+```
+
+## Build
 
 ```bash
 npm run build

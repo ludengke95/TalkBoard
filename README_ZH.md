@@ -79,6 +79,18 @@ npm run build
 - [mediabunny](https://www.npmjs.com/package/mediabunny)
 - [Vitest](https://vitest.dev/) (测试)
 
+## 鸣谢
+
+本项目的诞生离不开以下创作者和项目的启发与支持：
+
+- **张咋啦** - 自媒体创作者，本项目的灵感来源
+- **[Excalicord](https://excalicord.com)** - 影响本项目的原作品
+- **[Excalidraw](https://excalidraw.com/)** - 优秀的虚拟白板库
+- **杨任东** - 中文手写字体（杨任东朱石体）创作者
+- **[excalidraw-cn](https://github.com/korbinzhao/excalidraw-cn)** - Excalidraw 中文字体支持方案
+
+感谢以上所有创作者的开源贡献！
+
 ## 许可证
 
 MIT License - 详见 [LICENSE](LICENSE)。

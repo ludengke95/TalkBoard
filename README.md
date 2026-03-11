@@ -81,6 +81,16 @@ Access settings via the gear icon:
 - [mediabunny](https://www.npmjs.com/package/mediabunny)
 - [Vitest](https://vitest.dev/) (testing)
 
+## Acknowledgments
+
+This project was inspired by and built upon the work of many amazing creators and projects:
+
+- **张咋啦 (Zhang Zala)** - Content creator who inspired this project
+- **[Excalicord](https://excalicord.com)** - Original work that influenced this project
+- **[Excalidraw](https://excalidraw.com/)** - The amazing virtual whiteboard library
+- **杨任东** - Creator of the Chinese handwriting font (杨任东朱石体)
+- **[excalidraw-cn](https://github.com/korbinzhao/excalidraw-cn)** - Chinese font support for Excalidraw
+
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details.

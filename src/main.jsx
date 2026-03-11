@@ -3,6 +3,8 @@ import ReactDOM from 'react-dom/client'
 import App from './App'
 import './i18n'
 import './index.css'
+// 加载中文手写字体
+import './utils/chineseFontLoader'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

@@ -4,6 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>白板 - Excalidraw</title>
+    
+    <!-- 预加载中文手写字体，优化首次加载性能 -->
+    <link rel="preload" 
+          href="/fonts/YangRenDongZhuShiTi-Light-2.ttf" 
+          as="font" 
+          type="font/ttf" 
+          crossorigin="anonymous" />
+    
     <script>
       window.process = window.process || { env: { NODE_ENV: 'development' } };
     </script>

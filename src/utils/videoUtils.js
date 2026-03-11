@@ -97,7 +97,7 @@ export const smartConvertVideo = async (webmBlob) => {
     await conversion.execute()
     return {
       blob: new Blob([output.target.buffer], { type: "video/mp4" }),
-      filename: `whiteboard-${Date.now()}.mp4`,
+      filename: `talk-board-${Date.now()}.mp4`,
     }
   }
 
@@ -124,7 +124,7 @@ export const smartConvertVideo = async (webmBlob) => {
       await conversion.execute()
       return {
         blob: new Blob([output.target.buffer], { type: "video/mp4" }),
-        filename: `whiteboard-${Date.now()}.mp4`,
+        filename: `talk-board-${Date.now()}.mp4`,
       }
     } catch (error) {
       console.warn("编码转换失败，尝试容器转换:", error)
@@ -142,7 +142,7 @@ export const smartConvertVideo = async (webmBlob) => {
     await conversion.execute()
     return {
       blob: new Blob([output.target.buffer], { type: "video/mp4" }),
-      filename: `whiteboard-${Date.now()}.mp4`,
+      filename: `talk-board-${Date.now()}.mp4`,
     }
   } catch (error) {
     console.warn("容器转换失败:", error)
@@ -152,6 +152,6 @@ export const smartConvertVideo = async (webmBlob) => {
   console.log("Level 4: 返回原始 WebM")
   return {
     blob: webmBlob,
-    filename: `whiteboard-${Date.now()}.webm`,
+    filename: `talk-board-${Date.now()}.webm`,
   }
 }

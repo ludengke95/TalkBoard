@@ -14,7 +14,8 @@
 
 ## 在线演示
 
-**[立即体验 →](http://ludengke95.github.io/TalkBoard)**
+**[立即体验 1 →](https://talkboard.20251005.xyz)**
+**[立即体验 2（备用） →](https://ludengke95.github.io/TalkBoard)**
 
 ## 快速开始
 

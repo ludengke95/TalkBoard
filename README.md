@@ -14,7 +14,8 @@ A web-based whiteboard application with teleprompter and screen recording capabi
 
 ## Demo
 
-**[Try it online →](http://ludengke95.github.io/TalkBoard)**
+**[Try it online 1 →](https://talkboard.20251005.xyz)**
+**[Try it online 2 (Backup) →](https://ludengke95.github.io/TalkBoard)**
 
 Record your whiteboard presentations with camera overlay and export as MP4.
 

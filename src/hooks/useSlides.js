@@ -183,13 +183,29 @@ export const useSlides = ({
   const handleAddSlide = useCallback(() => {
     if (!excalidrawRef.current) return
 
-    const { width, height } = getSlideSize()
     const gap = 80
+    const existingElements = excalidrawRef.current.getSceneElements()
 
     let newX = 100
+    let width, height
     if (slides.length > 0) {
       const lastSlide = slides[slides.length - 1]
-      newX = lastSlide.x + lastSlide.width + gap
+      const lastFrame = existingElements.find(
+        (el) => el.type === "frame" && el.id === lastSlide.id && !el.isDeleted
+      )
+      if (lastFrame) {
+        newX = lastFrame.x + lastFrame.width + gap
+        width = lastFrame.width
+        height = lastFrame.height
+      } else {
+        newX = lastSlide.x + lastSlide.width + gap
+        width = lastSlide.width
+        height = lastSlide.height
+      }
+    } else {
+      const slideSize = getSlideSize()
+      width = slideSize.width
+      height = slideSize.height
     }
 
     const newSlide = {
@@ -203,7 +219,6 @@ export const useSlides = ({
 
     const frameElement = createSlideElement(newSlide)
 
-    const existingElements = excalidrawRef.current.getSceneElements()
     excalidrawRef.current.updateScene({
       elements: [...existingElements, frameElement],
       commitToHistory: true,

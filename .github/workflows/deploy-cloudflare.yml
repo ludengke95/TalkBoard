@@ -1,0 +1,88 @@
+name: CI & Deploy to Cloudflare Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test:run
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+  deploy:
+    needs: ci
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      deployments: write
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Create Pages project if not exists
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages project create talkboard --production-branch main
+        continue-on-error: true
+
+      - name: Add custom domain via API
+        run: |
+          curl -X POST "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/pages/projects/talkboard/domains" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            --data '{"name":"talkboard.20251005.xyz"}' || true
+
+      - name: Get Zone ID and create DNS record
+        run: |
+          ZONE_ID=$(curl -s -X GET "https://api.cloudflare.com/client/v4/zones?name=20251005.xyz" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" | jq -r '.result[0].id')
+          
+          PAGES_DOMAIN=$(curl -s -X GET "https://api.cloudflare.com/client/v4/accounts/${{ secrets.CLOUDFLARE_ACCOUNT_ID }}/pages/projects/talkboard" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" | jq -r '.result.subdomain')
+          
+          if [ -n "$ZONE_ID" ] && [ "$ZONE_ID" != "null" ] && [ -n "$PAGES_DOMAIN" ] && [ "$PAGES_DOMAIN" != "null" ]; then
+            curl -X POST "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
+              -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              --data "{\"type\":\"CNAME\",\"name\":\"talkboard\",\"content\":\"$PAGES_DOMAIN\",\"proxied\":true}" || true
+          fi
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          command: pages deploy dist --project-name=talkboard --branch=main

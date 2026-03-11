@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
-  base: process.env.NODE_ENV === "production" ? "/TalkBoard/" : "/",
+  base: process.env.BASE_URL || "/",
   define: {
     process: JSON.stringify({
       env: {

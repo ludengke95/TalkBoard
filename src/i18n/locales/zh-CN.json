@@ -51,15 +51,30 @@
     "defaultDevice": "默认",
     "selectDevice": "选择设备",
     "size": "大小",
-    "offset": "边距"
+    "offset": "边距",
+    "position": "位置",
+    "positionTopLeft": "左上",
+    "positionTopRight": "右上",
+    "positionBottomLeft": "左下",
+    "positionBottomRight": "右下"
   },
   "microphone": {
     "label": "麦克风",
     "defaultDevice": "默认",
-    "selectDevice": "选择设备"
+    "selectDevice": "选择设备",
+    "device": "设备"
   },
   "mouseEffect": {
     "label": "鼠标效果"
+  },
+  "recording": {
+    "label": "录制质量",
+    "qualityHigh": "高",
+    "qualityMedium": "中",
+    "qualityLow": "低",
+    "qualityHighDesc": "高质量，文件较大",
+    "qualityMediumDesc": "平衡质量与大小",
+    "qualityLowDesc": "较小文件，适合分享"
   },
   "help": {
     "title": "关于",

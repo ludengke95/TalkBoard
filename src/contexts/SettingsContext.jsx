@@ -36,6 +36,10 @@ const defaultSettings = {
     enabled: true,
     color: "#ffeb3b", // 鼠标高亮颜色
   },
+  // 6. 录制设置
+  recording: {
+    quality: "medium", // 录制质量: "high" | "medium" | "low"
+  },
 };
 
 // 从 localStorage 加载设置

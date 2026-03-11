@@ -30,7 +30,7 @@ export const useRecording = ({
   unlockViewState,
   slides,
 }) => {
-  const { mouseEffect, aspectRatio, cornerRadius, camera, microphone } = settings
+  const { mouseEffect, aspectRatio, cornerRadius, camera, microphone, recording } = settings
   const { startVideo } = useMediaDevices()
 
   // 录制状态
@@ -53,6 +53,13 @@ export const useRecording = ({
   const cameraStreamRef = useRef(null)
   const audioStreamRef = useRef(null)
   const videoTrackRef = useRef(null)
+
+  // 录制质量对应的码率映射 (bps)
+  const QUALITY_BITRATE = {
+    high: 10_000_000,    // 10 Mbps - 高质量
+    medium: 5_000_000,   // 5 Mbps - 中等质量
+    low: 2_000_000,      // 2 Mbps - 低质量
+  }
 
   /**
    * 绘制摄像头画面到画布
@@ -452,7 +459,7 @@ export const useRecording = ({
 
     const mediaRecorder = new MediaRecorder(stream, {
       mimeType,
-      videoBitsPerSecond: 10_000_000,
+      videoBitsPerSecond: QUALITY_BITRATE[recording?.quality] || QUALITY_BITRATE.medium,
     })
 
     chunksRef.current = []

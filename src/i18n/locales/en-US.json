@@ -51,15 +51,30 @@
     "defaultDevice": "Default",
     "selectDevice": "Select Device",
     "size": "Size",
-    "offset": "Offset"
+    "offset": "Offset",
+    "position": "Position",
+    "positionTopLeft": "Top Left",
+    "positionTopRight": "Top Right",
+    "positionBottomLeft": "Bottom Left",
+    "positionBottomRight": "Bottom Right"
   },
   "microphone": {
     "label": "Microphone",
     "defaultDevice": "Default",
-    "selectDevice": "Select Device"
+    "selectDevice": "Select Device",
+    "device": "Device"
   },
   "mouseEffect": {
     "label": "Mouse Effect"
+  },
+  "recording": {
+    "label": "Recording Quality",
+    "qualityHigh": "High",
+    "qualityMedium": "Medium",
+    "qualityLow": "Low",
+    "qualityHighDesc": "High quality, larger file",
+    "qualityMediumDesc": "Balanced quality and size",
+    "qualityLowDesc": "Smaller file, good for sharing"
   },
   "help": {
     "title": "About",

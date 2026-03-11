@@ -11,6 +11,7 @@ import AspectRatioSetting from "./AspectRatioSetting"
 import CameraSetting from "./CameraSetting"
 import MicrophoneSetting from "./MicrophoneSetting"
 import MouseEffectSetting from "./MouseEffectSetting"
+import RecordingQualitySetting from "./RecordingQualitySetting"
 import "./SettingsModal.css"
 
 function SettingsModal({ onClose }) {
@@ -105,6 +106,7 @@ function SettingsModal({ onClose }) {
             <CameraSetting />
             <MicrophoneSetting />
             <MouseEffectSetting />
+            <RecordingQualitySetting />
           </div>
 
           {/* 底部操作区 */}
